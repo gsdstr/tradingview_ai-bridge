@@ -15,17 +15,18 @@ node_modules
 # Testing
 coverage
 
-# Turbo
-.turbo
-
-# Vercel
-.vercel
-
 # Build Outputs
 .next/
 out/
 build
 dist
+.cache
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
 
 
 # Debug
@@ -37,4 +38,4 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-/tmp
+tmp
