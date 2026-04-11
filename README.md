@@ -32,9 +32,10 @@ This Turborepo
 ### Apps and Packages
 
 - `apps/cli`: CLI tool for TradingView interaction
-- `@repo/core`: Core utilities and types for the monorepo
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `packages/core`: Core logic and CDP communication
+- `tooling/eslint`: Shared ESLint configurations (@repo/eslint)
+- `tooling/typescript`: Shared TypeScript configurations (@repo/typescript)
+- `tooling/prettier`: Shared Prettier configuration (@repo/prettier)
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
@@ -45,4 +46,3 @@ This Turborepo has some additional tools already setup for you:
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
-

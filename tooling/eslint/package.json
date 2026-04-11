@@ -1,5 +1,5 @@
 {
-  "name": "@repo/eslint-config",
+  "name": "@repo/eslint",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -7,6 +7,15 @@
     "./base": "./base.js",
     "./next-js": "./next.js",
     "./react-internal": "./react-internal.js"
+  },
+  "dependencies": {
+    "@eslint/compat": "^1.4.0",
+    "@eslint/js": "catalog:",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-turbo": "^2.7.1",
+    "globals": "^16.5.0",
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.50.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -1,3 +1,11 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "tooling/*"
+
+catalogs:
+  default:
+    "@eslint/js": "^9.39.1"
+    "@types/node": "^22.15.3"
+    "prettier": "^3.7.4"
+    "typescript": "^5.9.2"

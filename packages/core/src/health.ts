@@ -54,11 +54,7 @@ export async function checkHealth(): Promise<HealthStatus> {
   };
 }
 
-export async function launch(options: { port?: number; kill_existing?: boolean } = {}): Promise<any> {
-  const cdpPort = options.port || 9222;
-  const killFirst = options.kill_existing !== false;
-  const platform = process.platform;
-
+function findTradingViewExecutable(platform: string): string | null {
   const pathMap: Record<string, string[]> = {
     darwin: [
       "/Applications/TradingView.app/Contents/MacOS/TradingView",
@@ -78,14 +74,8 @@ export async function launch(options: { port?: number; kill_existing?: boolean }
     ],
   };
 
-  let tvPath: string | null = null;
   const candidates = pathMap[platform] || pathMap.linux || [];
-  for (const p of candidates) {
-    if (p && existsSync(p)) {
-      tvPath = p;
-      break;
-    }
-  }
+  let tvPath = candidates.find((p) => existsSync(p)) || null;
 
   if (!tvPath) {
     try {
@@ -112,10 +102,19 @@ export async function launch(options: { port?: number; kill_existing?: boolean }
       /* ignore */
     }
   }
+  //TODO log if tvPath is null. `Searched: ${(candidates || []).join(", ")}`
+  return tvPath;
+}
+
+export async function launch(options: { port?: number; kill_existing?: boolean } = {}): Promise<any> {
+  const cdpPort = options.port || 9222;
+  const killFirst = options.kill_existing !== false;
+  const platform = process.platform;
+  const tvPath = findTradingViewExecutable(platform);
 
   if (!tvPath) {
     throw new Error(
-      `TradingView not found on ${platform}. Searched: ${(candidates || []).join(", ")}. Launch manually with: /path/to/TradingView --remote-debugging-port=${cdpPort}`,
+      `TradingView not found on ${platform}. Launch manually with: /path/to/TradingView --remote-debugging-port=${cdpPort}`,
     );
   }
 

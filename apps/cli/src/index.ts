@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { APP_NAME, formatPrice } from "@repo/core";
+import { APP_NAME, formatPrice, getErrorMessage } from "@repo/core";
 
 const program = new Command();
 
@@ -29,8 +29,27 @@ program
       const { checkHealth } = await import("@repo/core");
       const status = await checkHealth();
       console.log("Health Status:", JSON.stringify(status, null, 2));
-    } catch (error: any) {
-      console.error("Health check failed:", error.message);
+    } catch (error: unknown) {
+      console.error("Health check failed:", getErrorMessage(error));
+      process.exit(1);
+    }
+  });
+
+program
+  .command("launch")
+  .description("Launch TradingView with remote debugging enabled")
+  .option("-p, --port <number>", "CDP port (default: 9222)", "9222")
+  .option("--kill", "Kill existing TradingView instances")
+  .action(async (options) => {
+    try {
+      const { launch } = await import("@repo/core");
+      const result = await launch({
+        port: parseInt(options.port, 10),
+        kill_existing: options.kill,
+      });
+      console.log("Launch Success:", JSON.stringify(result, null, 2));
+    } catch (error: unknown) {
+      console.error("Launch failed:", getErrorMessage(error));
       process.exit(1);
     }
   });
@@ -48,4 +67,4 @@ program
     console.log(`Formatted Price: ${formatPrice(price)}`);
   });
 
-program.parseAsync();
+await program.parseAsync();
