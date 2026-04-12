@@ -125,9 +125,22 @@ function findTradingViewExecutable(platform: string): string | null {
   return tvPath;
 }
 
+export interface LaunchResult {
+  success: boolean;
+  platform: NodeJS.Platform | string;
+  binary: string;
+  pid?: number;
+  cdp_port: number;
+  cdp_url?: string;
+  browser?: string;
+  user_agent?: string;
+  cdp_ready?: boolean;
+  warning?: string;
+}
+
 export async function launch(
   options: { port?: number; kill_existing?: boolean } = {},
-): Promise<any> {
+): Promise<LaunchResult> {
   const cdpPort = options.port ?? 9222;
   const killFirst = options.kill_existing !== false;
   const platform = process.platform;

@@ -34,3 +34,5 @@ export * from "./connection.js";
 export * from "./core/tv.js";
 export * from "./core/watchlist.js";
 export * from "./error.js";
+export * from "./actions/action.js";
+export * from "./actions/tv.js";
