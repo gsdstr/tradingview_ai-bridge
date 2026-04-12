@@ -32,7 +32,7 @@ This Turborepo
 ### Apps and Packages
 
 - `apps/cli`: CLI tool for TradingView interaction
-- `packages/core`: Core logic and CDP communication
+- `packages/shared`: Core logic and CDP communication
 - `tooling/eslint`: Shared ESLint configurations (@repo/eslint)
 - `tooling/typescript`: Shared TypeScript configurations (@repo/typescript)
 - `tooling/prettier`: Shared Prettier configuration (@repo/prettier)

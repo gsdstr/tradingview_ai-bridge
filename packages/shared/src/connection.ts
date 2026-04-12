@@ -152,10 +152,10 @@ export async function getTargetInfo(): Promise<Target> {
   return targetInfo!;
 }
 
-export async function evaluate(
+export async function evaluate<T = any>(
   expression: string,
   opts: EvaluateOptions = {},
-): Promise<any> {
+): Promise<T> {
   const c = await getClient();
   const result = await c.Runtime.evaluate({
     expression,
@@ -173,15 +173,15 @@ export async function evaluate(
   return result.result?.value;
 }
 
-export async function evaluateFnc(
+export async function evaluateFnc<T = any>(
   fn: Function | string,
   opts: EvaluateOptions = {},
-): Promise<any> {
-  return evaluate(`(${fn})()`, opts);
+): Promise<T> {
+  return evaluate<T>(`(${fn})()`, opts);
 }
 
-export async function evaluateAsync(expression: string): Promise<any> {
-  return evaluate(expression, { awaitPromise: true });
+export async function evaluateAsync<T = any>(expression: string): Promise<T> {
+  return evaluate<T>(expression, { awaitPromise: true });
 }
 
 export async function disconnect(): Promise<void> {

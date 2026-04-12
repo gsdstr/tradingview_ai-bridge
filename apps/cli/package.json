@@ -13,7 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@repo/core": "workspace:*",
+    "@repo/shared": "workspace:*",
     "commander": "^13.1.0"
   },
   "devDependencies": {

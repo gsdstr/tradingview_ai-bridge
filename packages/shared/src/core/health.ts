@@ -1,7 +1,7 @@
 /**
  * Core health/discovery/launch logic.
  */
-import { getClient, getTargetInfo, evaluateFnc } from "./connection.js";
+import { getClient, getTargetInfo, evaluateFnc } from "../connection.js";
 import { existsSync } from "fs";
 import { execSync, spawn } from "child_process";
 import http from "http";
@@ -22,8 +22,18 @@ export async function checkHealth(): Promise<HealthStatus> {
   await getClient();
   const target = await getTargetInfo();
 
-  const state = await evaluateFnc(function () {
-    const result: any = { url: window.location.href, title: document.title };
+  interface HealthStateResult {
+    url: string;
+    title: string;
+    symbol?: string;
+    resolution?: string;
+    chartType?: number | null;
+    apiAvailable?: boolean;
+    apiError?: string;
+  }
+
+  const state = await evaluateFnc<HealthStateResult>(function () {
+    const result: HealthStateResult = { url: window.location.href, title: document.title };
     try {
       // @ts-expect-error TradingViewApi defined outs this scope
       const chart = window.TradingViewApi._activeChartWidgetWV.value();
@@ -31,12 +41,12 @@ export async function checkHealth(): Promise<HealthStatus> {
       result.resolution = chart.resolution();
       result.chartType = chart.chartType();
       result.apiAvailable = true;
-    } catch (e: any) {
+    } catch (e: unknown) {
       result.symbol = "unknown";
       result.resolution = "unknown";
       result.chartType = null;
       result.apiAvailable = false;
-      result.apiError = e.message;
+      result.apiError = e instanceof Error ? e.message : String(e);
     }
     return result;
   });

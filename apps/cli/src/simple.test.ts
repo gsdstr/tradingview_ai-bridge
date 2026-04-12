@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatPrice } from "@repo/core";
+import { formatPrice } from "@repo/shared";
 
 describe("formatPrice", () => {
   it("correctly formats USD", () => {

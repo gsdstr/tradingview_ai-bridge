@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { APP_NAME, formatPrice, getErrorMessage } from "@repo/core";
+import { APP_NAME, formatPrice, getErrorMessage } from "@repo/shared";
 
 const program = new Command();
 
@@ -9,7 +9,7 @@ program
   .description("TradingView AI Desk Command Line Interface")
   .version("0.1.0")
   .hook("postAction", async () => {
-    const { disconnect } = await import("@repo/core");
+    const { disconnect } = await import("@repo/shared");
     await disconnect();
   });
 
@@ -26,7 +26,7 @@ program
   .description("Check TradingView connection health")
   .action(async () => {
     try {
-      const { checkHealth } = await import("@repo/core");
+      const { checkHealth } = await import("@repo/shared");
       const status = await checkHealth();
       console.log("Health Status:", JSON.stringify(status, null, 2));
     } catch (error: unknown) {
@@ -42,7 +42,7 @@ program
   .option("--kill", "Kill existing TradingView instances")
   .action(async (options) => {
     try {
-      const { launch } = await import("@repo/core");
+      const { launch } = await import("@repo/shared");
       const result = await launch({
         port: parseInt(options.port, 10),
         kill_existing: options.kill,

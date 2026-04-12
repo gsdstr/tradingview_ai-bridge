@@ -11,7 +11,7 @@
     "typecheck": "turbo run typecheck",
     "test": "vitest run",
     "cli": "pnpm --filter cli dev",
-    "core": "pnpm --filter @repo/core"
+    "shared": "pnpm --filter @repo/shared"
   },
   "devDependencies": {
     "@repo/prettier": "workspace:*",
