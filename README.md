@@ -25,24 +25,35 @@ The debug port is disabled by default and must be explicitly enabled by you usin
 
 ## Structure
 
-This Turborepo
+This monorepo is managed by [Turborepo](https://turbo.build/) and uses the **Shared Action Architecture**. All core functionality is defined as atomic, schema-validated actions in the shared package.
 
 ### Apps and Packages
 
-### Apps and Packages
+- **`apps/cli`**: A dynamic CLI built with [Yargs](https://yargs.js.org/). It automatically transforms shared actions into commands and subcommands (e.g., `watchlist get`).
+- **`apps/mcp`**: A [Model Context Protocol](https://modelcontextprotocol.io/) server that dynamically exposes shared actions as tools for AI agents.
+- **`packages/shared`**: The heart of the project. Contains:
+  - `src/actions/`: Core business logic defined using the `Action` interface and `StandardSchemaV1` (Zod).
+  - `src/core/`: Internal TradingView bridge logic (CDP, watchlist manipulation, etc.).
+- **`tooling/*`**: Shared configurations for ESLint, Prettier, and TypeScript.
 
-- `apps/cli`: CLI tool for TradingView interaction
-- `packages/shared`: Core logic and CDP communication
-- `tooling/eslint`: Shared ESLint configurations (@repo/eslint)
-- `tooling/typescript`: Shared TypeScript configurations (@repo/typescript)
-- `tooling/prettier`: Shared Prettier configuration (@repo/prettier)
+### Available Actions
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+The following actions are defined in `@repo/shared` and available via both the CLI and MCP:
 
-### Utilities
+| Domain | CLI Command | Description |
+| :--- | :--- | :--- |
+| **TradingView** | `tv launch` | Launch TradingView Desktop with remote debugging (CDP) enabled. |
+| **Watchlist** | `watchlist get` | Fetch the currently open symbol watchlist from the TradingView UI. |
+| **Watchlist** | `watchlist add` | Add a new symbol to your current TradingView watchlist. |
+| **System** | `health` | Verify the CDP connection and TradingView API availability. |
+| **System** | `info` | Show application metadata and connection status. |
+| **System** | `price` | Test the price formatting utility from the shared library. |
 
-This Turborepo has some additional tools already setup for you:
+## Utilities
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+This project uses modern tooling for developer experience:
+
+- [pnpm](https://pnpm.io/) for fast, disk-efficient package management.
+- [TypeScript](https://www.typescriptlang.org/) for strict type safety.
+- [Zod](https://zod.dev/) and [StandardSchemaV1](https://github.com/standard-schema/spec) for runtime validation.
+- [ESLint](https://eslint.org/) and [Prettier](https://prettier.io) for code quality.

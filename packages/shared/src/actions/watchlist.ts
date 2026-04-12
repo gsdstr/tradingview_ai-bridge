@@ -8,18 +8,22 @@ const getOutputSchema = z.object({
   success: z.boolean(),
   count: z.number(),
   source: z.string(),
-  symbols: z.array(z.object({
-    symbol: z.string(),
-    last: z.string().nullable(),
-    change: z.string().nullable(),
-    change_percent: z.string().nullable(),
-  })),
+  symbols: z.array(
+    z.object({
+      symbol: z.string(),
+      last: z.string().nullable(),
+      change: z.string().nullable(),
+      change_percent: z.string().nullable(),
+    }),
+  ),
 });
 
 export const watchlistGet: Action<undefined, typeof getOutputSchema> = {
-  name: "tv_watchlist_get",
-  shortDescription: "Fetch the currently open symbol watchlist from TradingView",
-  description: "Retrieves the list of symbols and their current price data from the active watchlist panel.",
+  name: "watchlist_get",
+  shortDescription:
+    "Fetch the currently open symbol watchlist from TradingView",
+  description:
+    "Retrieves the list of symbols and their current price data from the active watchlist panel.",
   outputSchema: getOutputSchema,
   action: async () => {
     return await get();
@@ -38,10 +42,14 @@ const addOutputSchema = z.object({
   action: z.string(),
 });
 
-export const watchlistAdd: Action<typeof addInputSchema, typeof addOutputSchema> = {
-  name: "tv_watchlist_add",
+export const watchlistAdd: Action<
+  typeof addInputSchema,
+  typeof addOutputSchema
+> = {
+  name: "watchlist_add",
   shortDescription: "Add a new symbol to your TradingView watchlist",
-  description: "Opens the search box and adds the specified symbol to the current watchlist.",
+  description:
+    "Opens the search box and adds the specified symbol to the current watchlist.",
   inputSchema: addInputSchema,
   outputSchema: addOutputSchema,
   action: async (input) => {
