@@ -1,7 +1,12 @@
 import { McpServer, StdioServerTransport } from "@modelcontextprotocol/server";
-import { z } from "zod";
-import { checkHealth, launch, get, add, getErrorMessage } from "@repo/shared";
+import { actionRegistry, getErrorMessage } from "@repo/shared";
 
+/**
+ * TradingView AI Desk MCP Server
+ * 
+ * This server dynamically registers all tools from the shared Action registry,
+ * ensuring architectural consistency between the CLI and the MCP interface.
+ */
 const server = new McpServer(
   {
     name: "tradingview-ai-desk",
@@ -14,74 +19,46 @@ const server = new McpServer(
   }
 );
 
-server.registerTool(
-  "tv_health_check",
-  {
-    description: "Check the TradingView connection status and CDP connectivity."
-  },
-  async () => {
-    try {
-      const result = await checkHealth();
-      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
-    } catch (e: unknown) {
-      return { content: [{ type: "text", text: `Error: ${getErrorMessage(e)}` }], isError: true };
+// Dynamically register all shared actions as MCP tools
+for (const action of Object.values(actionRegistry)) {
+  server.registerTool(
+    action.name,
+    {
+      description: action.description,
+      // Pass the schema if it exists. 
+      // The MCP SDK accepts Zod schemas directly.
+      inputSchema: action.inputSchema as any,
+    },
+    async (input: any) => {
+      try {
+        const result = await (action.action as any)(input);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error: unknown) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Error executing ${action.name}: ${getErrorMessage(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
     }
-  }
-);
-
-server.registerTool(
-  "tv_launch",
-  {
-    description: "Launch the TradingView Electron App manually."
-  },
-  async () => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const result = await launch();
-      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
-    } catch (e: unknown) {
-      return { content: [{ type: "text", text: `Error: ${getErrorMessage(e)}` }], isError: true };
-    }
-  }
-);
-
-server.registerTool(
-  "tv_watchlist_get",
-  {
-    description: "Fetch the currently open symbol watchlist from TradingView."
-  },
-  async () => {
-    try {
-      const result = await get();
-      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
-    } catch (e: unknown) {
-      return { content: [{ type: "text", text: `Error: ${getErrorMessage(e)}` }], isError: true };
-    }
-  }
-);
-
-server.registerTool(
-  "tv_watchlist_add",
-  {
-    description: "Add a new symbol to your TradingView watchlist.",
-    inputSchema: z.object({
-      symbol: z.string().describe("The ticker symbol to add (e.g., AAPL).")
-    })
-  },
-  async ({ symbol }) => {
-    try {
-      const result = await add({ symbol });
-      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
-    } catch (e: unknown) {
-      return { content: [{ type: "text", text: `Error: ${getErrorMessage(e)}` }], isError: true };
-    }
-  }
-);
+  );
+}
 
 async function run() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("TradingView MCP Server running on stdio");
+  console.error("TradingView AI Desk MCP Server running on stdio");
 }
 
 run().catch((error) => {

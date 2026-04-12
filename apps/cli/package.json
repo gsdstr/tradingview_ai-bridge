@@ -14,12 +14,13 @@
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
-    "commander": "^13.1.0"
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@repo/eslint": "workspace:*",
     "@repo/typescript": "workspace:*",
     "@types/node": "^22.15.3",
+    "@types/yargs": "^17.0.35",
     "tsx": "^4.19.2",
     "typescript": "5.9.2"
   }
