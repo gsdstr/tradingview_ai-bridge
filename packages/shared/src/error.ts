@@ -3,9 +3,9 @@
  * @see https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
  */
 
-type ErrorWithMessage = {
+interface ErrorWithMessage {
   message: string;
-};
+}
 
 function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
   return (

@@ -27,5 +27,8 @@
     "next/dist/client/router.d.ts"
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
-  "cSpell.words": ["prettiercache", "tradingview"]
+  "cSpell.words": ["prettiercache", "tradingview"],
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

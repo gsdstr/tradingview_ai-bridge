@@ -1,6 +1,7 @@
 /**
  * Core health/discovery/launch logic.
  */
+/// <reference path="../tradingview.d.ts" />
 import { getClient, getTargetInfo, evaluateFnc } from "../connection.js";
 import { existsSync } from "fs";
 import { execSync, spawn } from "child_process";
@@ -33,9 +34,11 @@ export async function checkHealth(): Promise<HealthStatus> {
   }
 
   const state = await evaluateFnc<HealthStateResult>(function () {
-    const result: HealthStateResult = { url: window.location.href, title: document.title };
+    const result: HealthStateResult = {
+      url: window.location.href,
+      title: document.title,
+    };
     try {
-      // @ts-expect-error TradingViewApi defined outs this scope
       const chart = window.TradingViewApi._activeChartWidgetWV.value();
       result.symbol = chart.symbol();
       result.resolution = chart.resolution();
@@ -89,8 +92,11 @@ function findTradingViewExecutable(platform: string): string | null {
 
   if (!tvPath) {
     try {
-      const cmd = platform === "win32" ? "where TradingView.exe" : "which tradingview";
-      tvPath = execSync(cmd, { timeout: 3000 }).toString().trim().split("\n")[0] || null;
+      const cmd =
+        platform === "win32" ? "where TradingView.exe" : "which tradingview";
+      tvPath =
+        execSync(cmd, { timeout: 3000 }).toString().trim().split("\n")[0] ||
+        null;
       if (tvPath && !existsSync(tvPath)) tvPath = null;
     } catch {
       /* ignore */
@@ -99,9 +105,12 @@ function findTradingViewExecutable(platform: string): string | null {
 
   if (!tvPath && platform === "darwin") {
     try {
-      const found = execSync('mdfind "kMDItemFSName == TradingView.app" | head -1', {
-        timeout: 5000,
-      })
+      const found = execSync(
+        'mdfind "kMDItemFSName == TradingView.app" | head -1',
+        {
+          timeout: 5000,
+        },
+      )
         .toString()
         .trim();
       if (found) {
@@ -116,8 +125,10 @@ function findTradingViewExecutable(platform: string): string | null {
   return tvPath;
 }
 
-export async function launch(options: { port?: number; kill_existing?: boolean } = {}): Promise<any> {
-  const cdpPort = options.port || 9222;
+export async function launch(
+  options: { port?: number; kill_existing?: boolean } = {},
+): Promise<any> {
+  const cdpPort = options.port ?? 9222;
   const killFirst = options.kill_existing !== false;
   const platform = process.platform;
   const tvPath = findTradingViewExecutable(platform);
@@ -130,7 +141,8 @@ export async function launch(options: { port?: number; kill_existing?: boolean }
 
   if (killFirst) {
     try {
-      if (platform === "win32") execSync("taskkill /F /IM TradingView.exe", { timeout: 5000 });
+      if (platform === "win32")
+        execSync("taskkill /F /IM TradingView.exe", { timeout: 5000 });
       else execSync("pkill -f TradingView", { timeout: 5000 });
       await new Promise((r) => setTimeout(r, 1500));
     } catch {
@@ -149,11 +161,14 @@ export async function launch(options: { port?: number; kill_existing?: boolean }
     try {
       const ready = await new Promise<string | null>((resolve) => {
         http
-          .get(`http://localhost:${cdpPort}/json/version`, (res: http.IncomingMessage) => {
-            let data = "";
-            res.on("data", (chunk: any) => (data += chunk));
-            res.on("end", () => resolve(data));
-          })
+          .get(
+            `http://localhost:${cdpPort}/json/version`,
+            (res: http.IncomingMessage) => {
+              let data = "";
+              res.on("data", (chunk: any) => (data += chunk));
+              res.on("end", () => resolve(data));
+            },
+          )
           .on("error", () => resolve(null));
       });
       if (ready) {
