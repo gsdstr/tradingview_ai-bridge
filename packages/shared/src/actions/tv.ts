@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Action } from "./action.js";
 import { launch } from "../core/tv.js";
+import { checkHealth } from "../core/tv.js";
 
 const inputSchema = z.object({
   port: z
@@ -15,7 +16,7 @@ const inputSchema = z.object({
     .describe("Kill existing TradingView instances (default: false)"),
 });
 
-const outputSchema = z.object({
+const launchOutputSchema = z.object({
   success: z.boolean(),
   platform: z.string(),
   binary: z.string(),
@@ -28,17 +29,41 @@ const outputSchema = z.object({
   warning: z.string().optional(),
 });
 
-export const tvLaunch: Action<typeof inputSchema, typeof outputSchema> = {
+export const tvLaunch: Action<typeof inputSchema, typeof launchOutputSchema> = {
   name: "tv_launch",
   shortDescription: "Launch TradingView with remote debugging",
   description:
     "Launches the TradingView Desktop application with the Chrome DevTools Protocol enabled on the specified port. Optionally kills existing instances first.",
   inputSchema,
-  outputSchema,
+  outputSchema: launchOutputSchema,
   action: async (input) => {
     return launch({
       port: input.port,
       kill_existing: input.kill_existing,
     });
+  },
+};
+
+const healthOutputSchema = z.object({
+  success: z.boolean(),
+  cdp_connected: z.boolean(),
+  target_id: z.string().optional(),
+  target_url: z.string().optional(),
+  target_title: z.string().optional(),
+  chart_symbol: z.string().optional(),
+  chart_resolution: z.string().optional(),
+  chart_type: z.number().optional(),
+  api_available: z.boolean(),
+  error: z.string().optional(),
+});
+
+export const tvHealthCheck: Action<undefined, typeof healthOutputSchema> = {
+  name: "tv_health",
+  shortDescription: "Check TradingView connection health",
+  description:
+    "Verifies the CDP connection to TradingView and ensures APIs are available.",
+  outputSchema: healthOutputSchema,
+  action: async () => {
+    return checkHealth() as any;
   },
 };

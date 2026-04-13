@@ -1,4 +1,4 @@
-# TradingView Bridge (via Chrome DevTools Protocol)
+# TradingView AI Bridge (via Chrome DevTools Protocol)
 
 Bridge to connect your AI assistant to your TradingView Desktop charts. Connects agents (Claude Code, Antigravity, etc.) to your locally running TradingView app via Chrome DevTools Protocol for AI-assisted chart analysis, Pine Script development, and workflow automation.
 

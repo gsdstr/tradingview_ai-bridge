@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "bin": {
+    "tv-bridge-cli": "./dist/tv-bridge-cli.js"
+  },
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
@@ -10,7 +13,9 @@
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bundle": "node build.js",
+    "bundle:debug": "node build.js --debug"
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
@@ -21,6 +26,8 @@
     "@repo/typescript": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/yargs": "^17.0.35",
+    "esbuild": "^0.28.0",
+    "execa": "^9.6.1",
     "tsx": "^4.19.2",
     "typescript": "5.9.2"
   }

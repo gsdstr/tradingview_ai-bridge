@@ -1,5 +1,6 @@
 {
-  "name": "tradingview-ai-desk",
+  "name": "tradingview-ai-bridge",
+  "author": "gsdstr",
   "private": true,
   "scripts": {
     "build": "turbo run build",

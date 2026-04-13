@@ -2,13 +2,6 @@
 
 export const APP_NAME = "TradingView AI Desk";
 
-export function formatPrice(price: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
-}
-
 /**
  * Common types shared across the monorepo
  */

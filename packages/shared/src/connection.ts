@@ -56,9 +56,9 @@ export function requireFinite(value: any, name: string): number {
 export async function getClient(): Promise<CDP.Client> {
   if (client) {
     try {
-      // Quick liveness check
-      await client.Runtime.evaluate({ expression: "1", returnByValue: true });
-      return client;
+      if (await isConnected()) {
+        return client;
+      }
     } catch {
       client = null;
       targetInfo = null;
@@ -129,19 +129,23 @@ export async function connect(): Promise<CDP.Client> {
     }
   }
 
-  const errorMessage = lastError instanceof Error ? lastError.message : String(lastError);
+  const errorMessage =
+    lastError instanceof Error ? lastError.message : String(lastError);
   throw new Error(
     `CDP connection failed after ${MAX_RETRIES} attempts: ${errorMessage}`,
   );
 }
 
 async function findChartTarget(): Promise<Target | undefined> {
-  const resp = await globalThis.fetch(`http://${CDP_HOST}:${CDP_PORT}/json/list`);
+  const resp = await globalThis.fetch(
+    `http://${CDP_HOST}:${CDP_PORT}/json/list`,
+  );
   const targets = (await resp.json()) as Target[];
   // Prefer targets with tradingview.com/chart in the URL
   return (
-    targets.find((t) => t.type === "page" && /tradingview\.com\/chart/i.test(t.url)) ||
-    targets.find((t) => t.type === "page" && /tradingview/i.test(t.url))
+    targets.find(
+      (t) => t.type === "page" && /tradingview\.com\/chart/i.test(t.url),
+    ) || targets.find((t) => t.type === "page" && /tradingview/i.test(t.url))
   );
 }
 
@@ -149,7 +153,10 @@ export async function getTargetInfo(): Promise<Target> {
   if (!targetInfo) {
     await getClient();
   }
-  return targetInfo!;
+  if (!targetInfo) {
+    throw new Error("Target info not established after client initialization");
+  }
+  return targetInfo;
 }
 
 export async function evaluate<T = any>(
@@ -186,7 +193,7 @@ export async function evaluateAsync<T = any>(expression: string): Promise<T> {
 
 export async function disconnect(): Promise<void> {
   if (!client) return;
-    
+
   try {
     await client.close();
   } catch {
@@ -194,6 +201,17 @@ export async function disconnect(): Promise<void> {
   }
   client = null;
   targetInfo = null;
+}
+
+export async function isConnected(): Promise<boolean> {
+  if (!client) return false;
+  try {
+    await client.Runtime.evaluate({ expression: "1", returnByValue: true });
+    return true;
+  } catch {
+    //TODO: log error to debug
+  }
+  return false;
 }
 
 async function verifyAndReturn(path: string, name: string): Promise<string> {
@@ -211,7 +229,10 @@ export async function getChartApi(): Promise<string> {
 }
 
 export async function getChartCollection(): Promise<string> {
-  return verifyAndReturn(KNOWN_PATHS.chartWidgetCollection, "Chart Widget Collection");
+  return verifyAndReturn(
+    KNOWN_PATHS.chartWidgetCollection,
+    "Chart Widget Collection",
+  );
 }
 
 export async function getBottomBar(): Promise<string> {
