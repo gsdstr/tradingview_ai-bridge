@@ -73,3 +73,24 @@ This project uses modern tooling for developer experience:
 - [TypeScript](https://www.typescriptlang.org/) for strict type safety.
 - [Zod](https://zod.dev/) and [StandardSchemaV1](https://github.com/standard-schema/spec) for runtime validation.
 - [ESLint](https://eslint.org/) and [Prettier](https://prettier.io) for code quality.
+
+## 🧪 Testing Architecture
+
+This monorepo follows modern testing best practices to ensure stability across core logic and E2E automation.
+
+### 🧩 Unit Testing (Colocated)
+Unit tests for core logic are colocated with the source code in `packages/shared/src/`. This ensures that logic and its verification stay in sync.
+- **Location**: `packages/shared/src/**/*.test.ts`
+- **Runner**: [Vitest](https://vitest.dev/)
+- **Command**: `pnpm --filter @repo/shared test`
+
+### 🏗️ End-to-End (E2E) Testing
+E2E tests interact with a real TradingView Desktop instance. They are isolated in a dedicated package to separate environment-dependent tests from pure logic.
+- **Location**: `apps/e2e/src/`
+- **Requirements**: TradingView Desktop running with `--remote-debugging-port=9222`.
+- **Runner**: [Vitest](https://vitest.dev/)
+- **Command**: `pnpm --filter @repo/e2e test`
+
+### ⚡ Monorepo Execution (Turborepo)
+We use [Turborepo](https://turbo.build/) to manage tests across all packages. This enables caching and parallel execution.
+- **Command**: `pnpm turbo test` (runs all unit, integration, and E2E tests).

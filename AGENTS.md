@@ -36,6 +36,12 @@ Repo discoverable for AI.
 
 **ALWAYS** use `pnpm` from root.
 
+## 🧪 Testing
+
+- **Unit Tests**: Colocated in `packages/shared/src/`. Use `pnpm --filter @repo/shared test`.
+- **E2E Tests**: Managed in `apps/e2e`. Require TradingView app with `--remote-debugging-port=9222`.
+- **Turbo**: Use `pnpm turbo test` for workspace-wide execution.
+
 ## 📝 Coding Patterns
 
 ### Error Handling

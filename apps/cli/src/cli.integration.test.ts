@@ -4,7 +4,7 @@ import { join } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const CLI_PATH = join(__dirname, "index.ts");
+const CLI_PATH = join(__dirname, "..", "src", "index.ts");
 
 describe("CLI Integration", () => {
   it("shows help output", async () => {
