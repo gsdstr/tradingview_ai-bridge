@@ -56,9 +56,13 @@ This repository provides pre-built "Skills" for AI agents (like Claude Code or A
 ### CLI Skill (`apps/skills/tv-bridge-cli`)
 A standalone, dependency-free bundle of the `tv-bridge-cli`. It includes a dedicated `SKILL.md` that teaches the agent how to launch TradingView, check chart status, and manipulate watchlists.
 
-To install/build the CLI skill:
+### MCP Skill (`apps/skills/tv-bridge-mcp`)
+A standalone bundle of the TradingView MCP server. It provides all bridge actions as tools to the agent via the Model Context Protocol.
+
+To install/build both skills:
 ```bash
 pnpm --filter @repo/skill-tv-bridge-cli run build
+pnpm --filter @repo/skill-tv-bridge-mcp run build
 ```
 
 ## Utilities

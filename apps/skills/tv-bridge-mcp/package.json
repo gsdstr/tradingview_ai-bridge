@@ -1,0 +1,10 @@
+{
+  "name": "@repo/skill-tv-bridge-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent Skill for TradingView AI Bridge MCP Server",
+  "scripts": {
+    "build": "pnpm --filter mcp bundle && mkdir -p scripts && cp ../../mcp/dist/tv-bridge-mcp.js ./scripts/"
+  }
+}
