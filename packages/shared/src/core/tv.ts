@@ -2,7 +2,7 @@
  * Core health/discovery/launch logic.
  */
 /// <reference path="../tradingview.d.ts" />
-import { getClient, getTargetInfo, evaluateFnc } from "../connection.js";
+import { getClient, getTargetInfo, evaluate } from "../connection.js";
 import { existsSync } from "fs";
 import { execSync, spawn } from "child_process";
 import http from "http";
@@ -33,7 +33,7 @@ export async function checkHealth(): Promise<HealthStatus> {
     apiError?: string;
   }
 
-  const state = await evaluateFnc<HealthStateResult>(function () {
+  const state = await evaluate<HealthStateResult>(function () {
     const result: HealthStateResult = {
       url: window.location.href,
       title: document.title,

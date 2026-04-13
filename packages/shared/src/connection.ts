@@ -10,6 +10,8 @@ interface Target {
 interface EvaluateOptions {
   awaitPromise?: boolean;
   returnByValue?: boolean;
+  userGesture?: boolean;
+  timeout?: number;
   [key: string]: any;
 }
 
@@ -159,36 +161,67 @@ export async function getTargetInfo(): Promise<Target> {
   return targetInfo;
 }
 
-export async function evaluate<T = any>(
+async function evaluateRaw<T = any>(
   expression: string,
   opts: EvaluateOptions = {},
 ): Promise<T> {
-  const c = await getClient();
-  const result = await c.Runtime.evaluate({
-    expression,
-    returnByValue: true,
-    awaitPromise: opts.awaitPromise ?? false,
-    ...opts,
-  });
-  if (result.exceptionDetails) {
-    const msg =
-      result.exceptionDetails.exception?.description ||
-      result.exceptionDetails.text ||
-      "Unknown evaluation error";
-    throw new Error(`JS evaluation error: ${msg}`);
+  const timeout = opts.timeout ?? 15000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const c = await getClient();
+    const result = await c.Runtime.evaluate({
+      expression,
+      returnByValue: true,
+      awaitPromise: opts.awaitPromise ?? false,
+      userGesture: opts.userGesture ?? true,
+      ...opts,
+    });
+
+    if (result.exceptionDetails) {
+      let msg =
+        (result.exceptionDetails.exception?.description ??
+          result.exceptionDetails.text) ||
+        "Unknown evaluation error";
+
+      if (result.exceptionDetails.stackTrace) {
+        const stack = result.exceptionDetails.stackTrace.callFrames
+          .map(
+            (f) =>
+              `  at ${f.functionName} (${f.url}:${f.lineNumber}:${f.columnNumber})`,
+          )
+          .join("\n");
+        msg += `\nStack:\n${stack}`;
+      }
+
+      throw new Error(`JS evaluation error: ${msg}`);
+    }
+    return result.result.value as T;
+  } finally {
+    clearTimeout(timer);
   }
-  return result.result?.value;
 }
 
-export async function evaluateFnc<T = any>(
+export async function evaluate<T = any>(
   fn: Function | string,
   opts: EvaluateOptions = {},
 ): Promise<T> {
-  return evaluate<T>(`(${fn})()`, opts);
+  const sourceName =
+    typeof fn === "function" ? fn.name || "anonymous" : "evaluate";
+  const fnStr = typeof fn === "function" ? fn.toString() : fn;
+
+  return evaluateRaw<T>(
+    `
+    (${fnStr})()
+    //# sourceURL=${sourceName}.js
+  `,
+    opts,
+  );
 }
 
 export async function evaluateAsync<T = any>(expression: string): Promise<T> {
-  return evaluate<T>(expression, { awaitPromise: true });
+  return evaluateRaw<T>(expression, { awaitPromise: true });
 }
 
 export async function disconnect(): Promise<void> {

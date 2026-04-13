@@ -4,6 +4,7 @@ import {
   getOhlcv,
   getIndicatorData,
   getStrategyResults,
+  getStrategyPerformance,
   getTrades,
   getQuote,
   getDepth,
@@ -48,6 +49,16 @@ export const dataGetStrategyResults: Action<undefined, z.ZodAny> = {
   description: "Retrieves performance metrics from the strategy tester (Profit, Drawdown, etc.).",
   action: async () => {
     return getStrategyResults();
+  },
+};
+
+export const dataGetStrategyPerformance: Action<undefined, z.ZodAny> = {
+  name: "data_get_strategy_performance",
+  shortDescription: "Get detailed strategy performance",
+  description:
+    "Retrieves full performance metrics directly from the strategy tester internal API.",
+  action: async () => {
+    return getStrategyPerformance();
   },
 };
 

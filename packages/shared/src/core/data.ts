@@ -1,11 +1,60 @@
-import { evaluate, evaluateAsync, evaluateFnc, KNOWN_PATHS, safeString } from "../connection.js";
+import {
+  evaluate,
+  evaluateAsync,
+  KNOWN_PATHS,
+  safeString,
+} from "../connection.js";
 
 const MAX_OHLCV_BARS = 500;
 const MAX_TRADES = 20;
 const CHART_API = KNOWN_PATHS.chartApi;
 const BARS_PATH = KNOWN_PATHS.mainSeriesBars;
 
-function buildGraphicsJS(collectionName: string, mapKey: string, filter: string) {
+export async function getStrategyPerformance() {
+  const results = await evaluate(function getStrategyPerformance() {
+    if (window.TV_CONFIG.isDebug) debugger;
+    const api = window.TradingViewApi._activeChartWidgetWV.value();
+    const chart = api._chartWidget;
+    if (!chart) return { error: "Chart widget not found" };
+
+    const sources = chart.model().model().dataSources() as any[];
+
+    const strategies = sources.filter(
+      (source) => source.reportData && source.performance,
+    );
+
+    if (!strategies || strategies.length === 0)
+      return {
+        metrics: {},
+        source: "internal_api",
+        error: "No strategy found on chart. Add a strategy indicator first.",
+      };
+
+    let performance = {};
+    const primary = strategies[0];
+
+    if (primary.reportData) {
+      const rd =
+        typeof primary.reportData === "function"
+          ? primary.reportData()
+          : primary.reportData;
+      performance = rd.performance;
+    }
+    return { performance: performance, source: primary.name() };
+  });
+  return {
+    success: true,
+    source: results?.source,
+    performance: results?.performance || {},
+    error: results?.error,
+  };
+}
+
+function buildGraphicsJS(
+  collectionName: string,
+  mapKey: string,
+  filter: string,
+) {
   return `
     (function() {
       var chart = window.TradingViewApi._activeChartWidgetWV.value()._chartWidget;
@@ -84,8 +133,10 @@ export async function getOhlcv(options: GetOhlcvOptions = {}): Promise<any> {
     data = null;
   }
 
-  if (!data || !data.bars || data.bars.length === 0) {
-    throw new Error("Could not extract OHLCV data. The chart may still be loading.");
+  if (!data?.bars || data.bars.length === 0) {
+    throw new Error(
+      "Could not extract OHLCV data. The chart may still be loading.",
+    );
   }
 
   if (summary) {
@@ -105,8 +156,12 @@ export async function getOhlcv(options: GetOhlcvOptions = {}): Promise<any> {
       low: Math.min(...lows),
       range: Math.round((Math.max(...highs) - Math.min(...lows)) * 100) / 100,
       change: Math.round((last.close - first.open) * 100) / 100,
-      change_pct: Math.round(((last.close - first.open) / first.open) * 10000) / 100 + "%",
-      avg_volume: Math.round(volumes.reduce((a: number, b: number) => a + b, 0) / volumes.length),
+      change_pct:
+        Math.round(((last.close - first.open) / first.open) * 10000) / 100 +
+        "%",
+      avg_volume: Math.round(
+        volumes.reduce((a: number, b: number) => a + b, 0) / volumes.length,
+      ),
       last_5_bars: bars.slice(-5),
     };
   }
@@ -120,7 +175,9 @@ export async function getOhlcv(options: GetOhlcvOptions = {}): Promise<any> {
   };
 }
 
-export async function getIndicatorData(options: { entity_id: string }): Promise<any> {
+export async function getIndicatorData(options: {
+  entity_id: string;
+}): Promise<any> {
   const { entity_id } = options;
   const data = await evaluate(`
     (function() {
@@ -139,7 +196,12 @@ export async function getIndicatorData(options: { entity_id: string }): Promise<
   let inputs = data?.inputs;
   if (Array.isArray(inputs)) {
     inputs = inputs.filter((inp: any) => {
-      if (inp.id === "text" && typeof inp.value === "string" && inp.value.length > 200) return false;
+      if (
+        inp.id === "text" &&
+        typeof inp.value === "string" &&
+        inp.value.length > 200
+      )
+        return false;
       if (typeof inp.value === "string" && inp.value.length > 500) return false;
       return true;
     });
@@ -185,7 +247,9 @@ export async function getStrategyResults(): Promise<any> {
   };
 }
 
-export async function getTrades(options: { max_trades?: number } = {}): Promise<any> {
+export async function getTrades(
+  options: { max_trades?: number } = {},
+): Promise<any> {
   const { max_trades } = options;
   const limit = Math.min(max_trades || 20, MAX_TRADES);
   const trades = await evaluate(`
@@ -229,7 +293,9 @@ export async function getTrades(options: { max_trades?: number } = {}): Promise<
   };
 }
 
-export async function getQuote(options: { symbol?: string } = {}): Promise<any> {
+export async function getQuote(
+  options: { symbol?: string } = {},
+): Promise<any> {
   const { symbol } = options;
   const data = await evaluate(`
     (function() {
@@ -261,7 +327,10 @@ export async function getQuote(options: { symbol?: string } = {}): Promise<any> 
       return quote;
     })()
   `);
-  if (!data || (!data.last && !data.close)) throw new Error("Could not retrieve quote. The chart may still be loading.");
+  if (!data || (!data.last && !data.close))
+    throw new Error(
+      "Could not retrieve quote. The chart may still be loading.",
+    );
   return { success: true, ...data };
 }
 
@@ -305,7 +374,7 @@ export async function getDepth(): Promise<any> {
     })()
   `);
 
-  if (!data || !data.found) throw new Error(data?.error || "DOM panel not found.");
+  if (!data?.found) throw new Error(data?.error || "DOM panel not found.");
   return {
     success: true,
     bid_levels: data.bids?.length || 0,
@@ -354,11 +423,14 @@ export async function getStudyValues(): Promise<any> {
   return { success: true, study_count: data?.length || 0, studies: data || [] };
 }
 
-export async function getPineLines(options: { study_filter?: string; verbose?: boolean } = {}): Promise<any> {
+export async function getPineLines(
+  options: { study_filter?: string; verbose?: boolean } = {},
+): Promise<any> {
   const { study_filter, verbose } = options;
   const filter = study_filter || "";
   const raw = await evaluate(buildGraphicsJS("dwglines", "lines", filter));
-  if (!raw || raw.length === 0) return { success: true, study_count: 0, studies: [] };
+  if (!raw || raw.length === 0)
+    return { success: true, study_count: 0, studies: [] };
 
   const studies = raw.map((s: any) => {
     const hLevels: number[] = [];
@@ -386,18 +458,29 @@ export async function getPineLines(options: { study_filter?: string; verbose?: b
       }
     }
     hLevels.sort((a, b) => b - a);
-    const result: any = { name: s.name, total_lines: s.count, horizontal_levels: hLevels };
+    const result: any = {
+      name: s.name,
+      total_lines: s.count,
+      horizontal_levels: hLevels,
+    };
     if (verbose) result.all_lines = allLines;
     return result;
   });
   return { success: true, study_count: studies.length, studies };
 }
 
-export async function getPineLabels(options: { study_filter?: string; max_labels?: number; verbose?: boolean } = {}): Promise<any> {
+export async function getPineLabels(
+  options: {
+    study_filter?: string;
+    max_labels?: number;
+    verbose?: boolean;
+  } = {},
+): Promise<any> {
   const { study_filter, max_labels, verbose } = options;
   const filter = study_filter || "";
   const raw = await evaluate(buildGraphicsJS("dwglabels", "labels", filter));
-  if (!raw || raw.length === 0) return { success: true, study_count: 0, studies: [] };
+  if (!raw || raw.length === 0)
+    return { success: true, study_count: 0, studies: [] };
 
   const limit = max_labels || 50;
   const studies = raw.map((s: any) => {
@@ -407,21 +490,40 @@ export async function getPineLabels(options: { study_filter?: string; max_labels
         const text = v.t || "";
         const price = v.y != null ? Math.round(v.y * 100) / 100 : null;
         if (verbose)
-          return { id: item.id, text, price, x: v.x, yloc: v.yl, size: v.sz, textColor: v.tci, color: v.ci };
+          return {
+            id: item.id,
+            text,
+            price,
+            x: v.x,
+            yloc: v.yl,
+            size: v.sz,
+            textColor: v.tci,
+            color: v.ci,
+          };
         return { text, price };
       })
       .filter((l: any) => l.text || l.price != null);
     if (labels.length > limit) labels = labels.slice(-limit);
-    return { name: s.name, total_labels: s.count, showing: labels.length, labels };
+    return {
+      name: s.name,
+      total_labels: s.count,
+      showing: labels.length,
+      labels,
+    };
   });
   return { success: true, study_count: studies.length, studies };
 }
 
-export async function getPineTables(options: { study_filter?: string } = {}): Promise<any> {
+export async function getPineTables(
+  options: { study_filter?: string } = {},
+): Promise<any> {
   const { study_filter } = options;
   const filter = study_filter || "";
-  const raw = await evaluate(buildGraphicsJS("dwgtablecells", "tableCells", filter));
-  if (!raw || raw.length === 0) return { success: true, study_count: 0, studies: [] };
+  const raw = await evaluate(
+    buildGraphicsJS("dwgtablecells", "tableCells", filter),
+  );
+  if (!raw || raw.length === 0)
+    return { success: true, study_count: 0, studies: [] };
 
   const studies = raw.map((s: any) => {
     const tables: any = {};
@@ -432,17 +534,26 @@ export async function getPineTables(options: { study_filter?: string } = {}): Pr
       if (!tables[tid][v.row]) tables[tid][v.row] = {};
       tables[tid][v.row][v.col] = v.t || "";
     }
-    const tableList = Object.entries(tables).map(([tid, rows]: [string, any]) => {
-      const rowNums = Object.keys(rows).map(Number).sort((a, b) => a - b);
-      const formatted = rowNums
-        .map((rn) => {
-          const cols = rows[rn];
-          const colNums = Object.keys(cols).map(Number).sort((a, b) => a - b);
-          return colNums.map((cn) => cols[cn]).filter(Boolean).join(" | ");
-        })
-        .filter(Boolean);
-      return { rows: formatted };
-    });
+    const tableList = Object.entries(tables).map(
+      ([tid, rows]: [string, any]) => {
+        const rowNums = Object.keys(rows)
+          .map(Number)
+          .sort((a, b) => a - b);
+        const formatted = rowNums
+          .map((rn) => {
+            const cols = rows[rn];
+            const colNums = Object.keys(cols)
+              .map(Number)
+              .sort((a, b) => a - b);
+            return colNums
+              .map((cn) => cols[cn])
+              .filter(Boolean)
+              .join(" | ");
+          })
+          .filter(Boolean);
+        return { rows: formatted };
+      },
+    );
     return { name: s.name, tables: tableList };
   });
   return { success: true, study_count: studies.length, studies };

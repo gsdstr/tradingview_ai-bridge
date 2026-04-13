@@ -1,5 +1,6 @@
 /*
-
+TradingView
+Version 2.14.0 • 10/16/2025
 */
 
 export interface ChartWidget {
@@ -41,8 +42,12 @@ declare global {
     TradingViewApi: TradingViewApi;
     TradingView: TradingViewGlobal;
     ChartApiInstance?: unknown;
+    TV_CONFIG: {
+      isDebug: boolean;
+      [key: string]: any;
+    };
   }
-  
+
   // // Make the global variable directly accessible without `window.` as well
   // var TradingViewApi: TradingViewApi;
   // var TradingView: TradingViewGlobal;
