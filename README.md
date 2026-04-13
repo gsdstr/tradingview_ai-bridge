@@ -31,6 +31,7 @@ This monorepo is managed by [Turborepo](https://turbo.build/) and uses the **Sha
 
 - **`apps/cli`**: A dynamic CLI built with [Yargs](https://yargs.js.org/). It automatically transforms shared actions into commands and subcommands (e.g., `watchlist get`).
 - **`apps/mcp`**: A [Model Context Protocol](https://modelcontextprotocol.io/) server that dynamically exposes shared actions as tools for AI agents.
+- **`apps/skills`**: Pre-configured **Agent Skills** that bundle tools (like the CLI) and instructions for autonomous agents.
 - **`packages/shared`**: The heart of the project. Contains:
   - `src/actions/`: Core business logic defined using the `Action` interface and `StandardSchemaV1` (Zod).
   - `src/core/`: Internal TradingView bridge logic (CDP, watchlist manipulation, etc.).
@@ -47,7 +48,18 @@ The following actions are defined in `@repo/shared` and available via both the C
 | **Watchlist** | `watchlist add` | Add a new symbol to your current TradingView watchlist. |
 | **System** | `health` | Verify the CDP connection and TradingView API availability. |
 | **System** | `info` | Show application metadata and connection status. |
-| **System** | `price` | Test the price formatting utility from the shared library. |
+
+## 🤖 Agent Skills
+
+This repository provides pre-built "Skills" for AI agents (like Claude Code or Antigravity) to enable autonomous interaction with TradingView.
+
+### CLI Skill (`apps/skills/tv-bridge-cli`)
+A standalone, dependency-free bundle of the `tv-bridge-cli`. It includes a dedicated `SKILL.md` that teaches the agent how to launch TradingView, check chart status, and manipulate watchlists.
+
+To install/build the CLI skill:
+```bash
+pnpm --filter @repo/skill-tv-bridge-cli run build
+```
 
 ## Utilities
 

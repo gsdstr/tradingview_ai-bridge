@@ -1,7 +1,5 @@
 # TradingView AI Bridge
 
-Ref `README.md`.
-
 ## Monorepo Architecture
 
 Turbo manage monorepo.
@@ -44,3 +42,7 @@ Repo discoverable for AI.
 
 **ALWAYS** use `getErrorMessage(error: unknown)` from `@repo/shared` in catch blocks. Robust error extraction.
 Ref: [Kent C. Dodds](https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript)
+
+## 📚 Documentation
+
+If you have lack of information, read `README.md`.
