@@ -1,4 +1,5 @@
 import type { Action } from "./action.js";
+export type { Action };
 import { tvLaunch, tvHealthCheck } from "./tv.js";
 import { infoDetails } from "./info.js";
 import { watchlistGet, watchlistAdd } from "./watchlist.js";
@@ -37,7 +38,11 @@ import {
   drawingRemove,
   drawingClearAll,
 } from "./drawing.js";
-import { indicatorSetInputs, indicatorToggleVisibility } from "./indicators.js";
+import {
+  indicatorSetInputs,
+  indicatorToggleVisibility,
+  indicatorList,
+} from "./indicators.js";
 import { paneList, paneSetLayout, paneFocus, paneSetSymbol } from "./pane.js";
 import {
   pineGetSource,
@@ -56,7 +61,11 @@ import {
   replayTrade,
   replayStatus,
 } from "./replay.js";
-import { streamFetchQuote, streamFetchBar, streamFetchValues } from "./stream.js";
+import {
+  streamFetchQuote,
+  streamFetchBar,
+  streamFetchValues,
+} from "./stream.js";
 
 export * from "./watchlist.js";
 export * from "./alerts.js";
@@ -125,6 +134,7 @@ export const actionRegistry: Record<string, Action<any, any>> = {
   // Indicators
   [indicatorSetInputs.name]: indicatorSetInputs,
   [indicatorToggleVisibility.name]: indicatorToggleVisibility,
+  [indicatorList.name]: indicatorList,
 
   // Pane
   [paneList.name]: paneList,

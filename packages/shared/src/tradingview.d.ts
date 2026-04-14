@@ -3,20 +3,35 @@ TradingView
 Version 2.14.0 • 10/16/2025
 */
 
+export interface DataSource {
+  isStarted(): boolean;
+  name(): string;
+  reportData?: (() => { performance: any }) | { performance: any };
+  performance?: any;
+  _id?: string;
+  price?(): number;
+  index?(): number;
+  visible?(): boolean;
+  zorder?(): number;
+}
+
 export interface ChartWidget {
   symbol(): string;
   resolution(): string;
   chartType(): number | null;
+  getAllStudies(): any[];
   /**
    * Internal model abstraction, dynamically discovered via CDP.
    */
   _chartWidget?: {
+    symbol(): string;
+    getAllStudies(): any[];
     model(): {
       mainSeries(): {
         bars(): unknown;
       };
       model(): {
-        dataSources(): unknown;
+        dataSources(): DataSource[];
       };
     };
   };

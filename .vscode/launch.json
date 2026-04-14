@@ -18,9 +18,11 @@
       "name": "Debug CLI (tv)",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "tsx",
-      "program": "${workspaceFolder}/apps/cli/src/index.ts",
-      "args": ["${input:cliArgs}"],
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "./node_modules/.bin/tsx ./apps/cli/src/index.ts ${input:cliArgs}"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
@@ -49,15 +51,17 @@
       "name": "Debug CLI — TV_DEBUG mode (renderer step-through)",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "tsx",
-      "program": "${workspaceFolder}/apps/cli/src/index.ts",
-      "args": ["${input:cliArgs}"],
+      "runtimeExecutable": "sh",
+      // to pass cliArgs without escaping
+      "runtimeArgs": [
+        "-c",
+        "TV_DEBUG=1 ./node_modules/.bin/tsx ./apps/cli/src/index.ts ${input:cliArgs}"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "env": {
-        "NODE_ENV": "development",
-        "TV_DEBUG": "1"
+        "NODE_ENV": "development"
       }
     },
     {
@@ -79,7 +83,8 @@
     {
       "id": "cliArgs",
       "type": "promptString",
-      "description": "CLI arguments (e.g. watchlist get)"
+      "description": "CLI arguments (e.g. watchlist get)",
+      "default": "indicator list"
     },
     {
       "id": "harnessFile",

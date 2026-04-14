@@ -1,28 +1,35 @@
 import yargs from "yargs";
 import { actionRegistry, getErrorMessage, disconnect } from "@repo/shared";
+import type { Action } from "@repo/shared";
 
 /**
  * Shared action handler logic factory
  */
-const createHandler = (action: any) => async (argv: any) => {
+const createHandler = (action: Action<any, any>) => async (argv: any) => {
   try {
     // Extract only the relevant inputs (exclude yargs metadata)
     const { _, $0, ...rawInputs } = argv;
 
     // Validate input schema if it exists
-    let validatedInput = rawInputs;
+    let validatedInput: unknown = rawInputs;
     if (action.inputSchema) {
       const result = await action.inputSchema["~standard"].validate(rawInputs);
       if (result.issues) {
-        const msg = `\n❌ Validation Error for '${action.name}':\n` + 
-          result.issues.map((issue: any) => `  - ${issue.path?.join(".") || "input"}: ${issue.message}`).join("\n");
+        const msg =
+          `\n❌ Validation Error for '${action.name}':\n` +
+          result.issues
+            .map(
+              (issue: any) =>
+                `  - ${issue.path?.join(".") || "input"}: ${issue.message}`,
+            )
+            .join("\n");
         if (!process.env.VITEST) {
           console.error(msg);
           process.exit(1);
         }
         throw new Error(msg);
       }
-      validatedInput = result.value;
+      validatedInput = result.value as unknown;
     }
 
     // Execute the action
@@ -71,14 +78,14 @@ export function createParser() {
     });
 
   // Organize actions into standalone and grouped (by prefix)
-  const standaloneActions: any[] = [];
-  const groupedActions: Record<string, any[]> = {};
+  const standaloneActions: Action<any, any>[] = [];
+  const groupedActions: Record<string, Action<any, any>[]> = {};
 
   for (const action of Object.values(actionRegistry)) {
     const parts = action.name.split("_");
     if (parts.length > 1) {
       const group = parts[0]!;
-      if (!groupedActions[group]) groupedActions[group] = [];
+      groupedActions[group] ??= [];
       groupedActions[group].push(action);
     } else {
       standaloneActions.push(action);
@@ -91,7 +98,7 @@ export function createParser() {
       action.name,
       action.shortDescription,
       (y) => y,
-      createHandler(action)
+      createHandler(action),
     );
   }
 
@@ -102,20 +109,20 @@ export function createParser() {
       `${groupName.charAt(0).toUpperCase() + groupName.slice(1)} operations`,
       (yargsGroup) => {
         for (const action of actions) {
-          // Use the part after the first underscore as the subcommand name
-          const subCommandName = action.name.split("_").slice(1).join("_");
+          // Use the part after the group name as the subcommand name
+          const subCommandName = action.name.slice(groupName.length + 1);
           yargsGroup.command(
             subCommandName,
             action.shortDescription,
             (sub) => sub,
-            createHandler(action)
+            createHandler(action),
           );
         }
         return yargsGroup.demandCommand(
           1,
-          `Please specify a ${groupName} subcommand.`
+          `Please specify a ${groupName} subcommand.`,
         );
-      }
+      },
     );
   }
 

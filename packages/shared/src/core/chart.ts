@@ -1,18 +1,25 @@
-import { evaluate, evaluateAsync, safeString, requireFinite } from "../connection.js";
+import {
+  evaluate,
+  evaluateAsync,
+  safeString,
+  requireFinite,
+} from "../connection.js";
 
 const CHART_API = "window.TradingViewApi._activeChartWidgetWV.value()";
 
-export async function waitForChartReady(symbol?: string | null, timeframe?: string | null): Promise<boolean> {
+async function waitForChartReady(
+  symbol?: string | null,
+  timeframe?: string | null,
+): Promise<boolean> {
   // Simple check for symbol/resolution match
   for (let i = 0; i < 20; i++) {
-    const state = await evaluate(`
-      (function() {
-        var chart = ${CHART_API};
-        return { symbol: chart.symbol(), resolution: chart.resolution() };
-      })()
-    `);
-    const symMatch = !symbol || state.symbol === symbol;
-    const tfMatch = !timeframe || state.resolution === timeframe;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { symbol, resolution } = await evaluate(function waitForChartReady() {
+      const chart = window.TradingViewApi._activeChartWidgetWV.value();
+      return { symbol: chart.symbol(), resolution: chart.resolution() };
+    });
+    const symMatch = !symbol || symbol === symbol;
+    const tfMatch = !timeframe || resolution === timeframe;
     if (symMatch && tfMatch) return true;
     await new Promise((r) => setTimeout(r, 500));
   }
@@ -48,7 +55,9 @@ export async function getState(): Promise<{ success: boolean } & ChartState> {
   return { success: true, ...state };
 }
 
-export async function setSymbol(options: { symbol: string }): Promise<{ success: boolean; symbol: string; chart_ready: boolean }> {
+export async function setSymbol(options: {
+  symbol: string;
+}): Promise<{ success: boolean; symbol: string; chart_ready: boolean }> {
   const { symbol } = options;
   await evaluateAsync(`
     (function() {
@@ -63,7 +72,9 @@ export async function setSymbol(options: { symbol: string }): Promise<{ success:
   return { success: true, symbol, chart_ready: ready };
 }
 
-export async function setTimeframe(options: { timeframe: string }): Promise<{ success: boolean; timeframe: string; chart_ready: boolean }> {
+export async function setTimeframe(options: {
+  timeframe: string;
+}): Promise<{ success: boolean; timeframe: string; chart_ready: boolean }> {
   const { timeframe } = options;
   await evaluate(`
     (function() {
@@ -75,7 +86,13 @@ export async function setTimeframe(options: { timeframe: string }): Promise<{ su
   return { success: true, timeframe, chart_ready: ready };
 }
 
-export async function setType(options: { chart_type: string | number }): Promise<{ success: boolean; chart_type: string | number; type_num: number }> {
+export async function setType(options: {
+  chart_type: string | number;
+}): Promise<{
+  success: boolean;
+  chart_type: string | number;
+  type_num: number;
+}> {
   const { chart_type } = options;
   const typeMap: Record<string, number> = {
     Bars: 0,
@@ -90,8 +107,15 @@ export async function setType(options: { chart_type: string | number }): Promise
     HollowCandles: 9,
   };
   const typeNum = typeMap[chart_type as string] ?? Number(chart_type);
-  if (isNaN(typeNum) || typeNum < 0 || typeNum > 9 || !Number.isInteger(typeNum)) {
-    throw new Error(`Unknown chart type: ${chart_type}. Use a name (Candles, Line, etc.) or number (0-9).`);
+  if (
+    isNaN(typeNum) ||
+    typeNum < 0 ||
+    typeNum > 9 ||
+    !Number.isInteger(typeNum)
+  ) {
+    throw new Error(
+      `Unknown chart type: ${chart_type}. Use a name (Candles, Line, etc.) or number (0-9).`,
+    );
   }
   await evaluate(`
     (function() {
@@ -109,12 +133,20 @@ export async function manageIndicator(options: {
   inputs?: any;
 }): Promise<any> {
   const { action, indicator, entity_id, inputs: inputsRaw } = options;
-  const inputs = inputsRaw ? (typeof inputsRaw === "string" ? JSON.parse(inputsRaw) : inputsRaw) : undefined;
+  const inputs = inputsRaw
+    ? typeof inputsRaw === "string"
+      ? JSON.parse(inputsRaw)
+      : inputsRaw
+    : undefined;
 
   if (action === "add") {
     if (!indicator) throw new Error("indicator name required for add action");
-    const inputArr = inputs ? Object.entries(inputs).map(([k, v]) => ({ id: k, value: v })) : [];
-    const before = await evaluate(`${CHART_API}.getAllStudies().map(function(s) { return s.id; })`);
+    const inputArr = inputs
+      ? Object.entries(inputs).map(([k, v]) => ({ id: k, value: v }))
+      : [];
+    const before = await evaluate(
+      `${CHART_API}.getAllStudies().map(function(s) { return s.id; })`,
+    );
     await evaluate(`
       (function() {
         var chart = ${CHART_API};
@@ -122,8 +154,12 @@ export async function manageIndicator(options: {
       })()
     `);
     await new Promise((r) => setTimeout(r, 1500));
-    const after = await evaluate(`${CHART_API}.getAllStudies().map(function(s) { return s.id; })`);
-    const newIds = (after || []).filter((id: string) => !(before || []).includes(id));
+    const after = await evaluate(
+      `${CHART_API}.getAllStudies().map(function(s) { return s.id; })`,
+    );
+    const newIds = (after || []).filter(
+      (id: string) => !(before || []).includes(id),
+    );
     return {
       success: newIds.length > 0,
       action: "add",
@@ -132,7 +168,10 @@ export async function manageIndicator(options: {
       new_study_count: newIds.length,
     };
   } else if (action === "remove") {
-    if (!entity_id) throw new Error("entity_id required for remove action. Use chart_get_state to find study IDs.");
+    if (!entity_id)
+      throw new Error(
+        "entity_id required for remove action. Use chart_get_state to find study IDs.",
+      );
     await evaluate(`
       (function() {
         var chart = ${CHART_API};
@@ -152,10 +191,17 @@ export async function getVisibleRange(): Promise<any> {
       return { visible_range: chart.getVisibleRange(), bars_range: chart.getVisibleBarsRange() };
     })()
   `);
-  return { success: true, visible_range: result.visible_range, bars_range: result.bars_range };
+  return {
+    success: true,
+    visible_range: result.visible_range,
+    bars_range: result.bars_range,
+  };
 }
 
-export async function setVisibleRange(options: { from: number; to: number }): Promise<any> {
+export async function setVisibleRange(options: {
+  from: number;
+  to: number;
+}): Promise<any> {
   const { from, to } = options;
   const f = requireFinite(from, "from");
   const t = requireFinite(to, "to");
@@ -184,15 +230,24 @@ export async function setVisibleRange(options: { from: number; to: number }): Pr
       catch(e) { return { from: 0, to: 0, error: e.message }; }
     })()
   `);
-  return { success: true, requested: { from, to }, actual: actual || { from: 0, to: 0 } };
+  return {
+    success: true,
+    requested: { from, to },
+    actual: actual || { from: 0, to: 0 },
+  };
 }
 
-export async function scrollToDate(options: { date: string | number }): Promise<any> {
+export async function scrollToDate(options: {
+  date: string | number;
+}): Promise<any> {
   const { date } = options;
   let timestamp: number;
   if (/^\d+$/.test(String(date))) timestamp = Number(date);
   else timestamp = Math.floor(new Date(date).getTime() / 1000);
-  if (isNaN(timestamp)) throw new Error(`Could not parse date: ${date}. Use ISO format (2024-01-15) or unix timestamp.`);
+  if (isNaN(timestamp))
+    throw new Error(
+      `Could not parse date: ${date}. Use ISO format (2024-01-15) or unix timestamp.`,
+    );
 
   const resolution = await evaluate(`${CHART_API}.resolution()`);
   let secsPerBar = 60;
@@ -227,7 +282,13 @@ export async function scrollToDate(options: { date: string | number }): Promise<
     })()
   `);
   await new Promise((r) => setTimeout(r, 500));
-  return { success: true, date, centered_on: timestamp, resolution, window: { from, to } };
+  return {
+    success: true,
+    date,
+    centered_on: timestamp,
+    resolution,
+    window: { from, to },
+  };
 }
 
 export async function symbolInfo(): Promise<any> {
@@ -245,7 +306,10 @@ export async function symbolInfo(): Promise<any> {
   return { success: true, ...result };
 }
 
-export async function symbolSearch(options: { query: string; type?: string }): Promise<any> {
+export async function symbolSearch(options: {
+  query: string;
+  type?: string;
+}): Promise<any> {
   const { query, type } = options;
   const params = new URLSearchParams({
     text: query,
@@ -256,11 +320,17 @@ export async function symbolSearch(options: { query: string; type?: string }): P
     domain: "production",
   });
 
-  const resp = await globalThis.fetch(`https://symbol-search.tradingview.com/symbol_search/v3/?${params}`, {
-    headers: { Origin: "https://www.tradingview.com", Referer: "https://www.tradingview.com/" },
-  });
+  const resp = await globalThis.fetch(
+    `https://symbol-search.tradingview.com/symbol_search/v3/?${params}`,
+    {
+      headers: {
+        Origin: "https://www.tradingview.com",
+        Referer: "https://www.tradingview.com/",
+      },
+    },
+  );
   if (!resp.ok) throw new Error(`Symbol search API returned ${resp.status}`);
-  const data = (await resp.json()) as any;
+  const data = await resp.json();
 
   const strip = (s: string) => (s || "").replace(/<\/?em>/g, "");
   const results = (data.symbols || data || []).slice(0, 15).map((r: any) => ({
@@ -268,8 +338,16 @@ export async function symbolSearch(options: { query: string; type?: string }): P
     description: strip(r.description),
     exchange: r.exchange || r.prefix || "",
     type: r.type || "",
-    full_name: r.exchange ? `${r.exchange}:${strip(r.symbol)}` : strip(r.symbol),
+    full_name: r.exchange
+      ? `${r.exchange}:${strip(r.symbol)}`
+      : strip(r.symbol),
   }));
 
-  return { success: true, query, source: "rest_api", results, count: results.length };
+  return {
+    success: true,
+    query,
+    source: "rest_api",
+    results,
+    count: results.length,
+  };
 }

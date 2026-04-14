@@ -7,8 +7,8 @@ const inputSchema = z.object({
   port: z
     .number()
     .optional()
-    .default(9222)
-    .describe("CDP port (default: 9222)"),
+    .default(9223)
+    .describe("CDP port (default: 9223)"),
   kill_existing: z
     .boolean()
     .optional()

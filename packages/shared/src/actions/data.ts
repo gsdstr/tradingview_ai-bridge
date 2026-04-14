@@ -16,7 +16,10 @@ import {
 
 const ohlcvInputSchema = z.object({
   count: z.number().optional().describe("Number of bars to fetch (max 500)"),
-  summary: z.boolean().optional().describe("Return a high-level summary instead of raw bars"),
+  summary: z
+    .boolean()
+    .optional()
+    .describe("Return a high-level summary instead of raw bars"),
 });
 
 export const dataGetOhlcv: Action<typeof ohlcvInputSchema, z.ZodAny> = {
@@ -33,10 +36,14 @@ const indicatorDataInputSchema = z.object({
   entity_id: z.string().describe("Indicator ID from chart_get_state"),
 });
 
-export const dataGetIndicator: Action<typeof indicatorDataInputSchema, z.ZodAny> = {
+export const dataGetIndicator: Action<
+  typeof indicatorDataInputSchema,
+  z.ZodAny
+> = {
   name: "data_get_indicator",
   shortDescription: "Get indicator data",
-  description: "Retrieves inputs and visibility state for a specific indicator.",
+  description:
+    "Retrieves inputs and visibility state for a specific indicator.",
   inputSchema: indicatorDataInputSchema,
   action: async (input) => {
     return getIndicatorData(input);
@@ -46,14 +53,15 @@ export const dataGetIndicator: Action<typeof indicatorDataInputSchema, z.ZodAny>
 export const dataGetStrategyResults: Action<undefined, z.ZodAny> = {
   name: "data_get_strategy_results",
   shortDescription: "Get strategy metrics",
-  description: "Retrieves performance metrics from the strategy tester (Profit, Drawdown, etc.).",
+  description:
+    "Retrieves performance metrics from the strategy tester (Profit, Drawdown, etc.).",
   action: async () => {
     return getStrategyResults();
   },
 };
 
 export const dataGetStrategyPerformance: Action<undefined, z.ZodAny> = {
-  name: "data_get_strategy_performance",
+  name: "data_get-strategy-performance",
   shortDescription: "Get detailed strategy performance",
   description:
     "Retrieves full performance metrics directly from the strategy tester internal API.",
@@ -77,7 +85,10 @@ export const dataGetTrades: Action<typeof tradesInputSchema, z.ZodAny> = {
 };
 
 const quoteInputSchema = z.object({
-  symbol: z.string().optional().describe("Optional symbol (defaults to current)"),
+  symbol: z
+    .string()
+    .optional()
+    .describe("Optional symbol (defaults to current)"),
 });
 
 export const dataGetQuote: Action<typeof quoteInputSchema, z.ZodAny> = {
@@ -93,7 +104,8 @@ export const dataGetQuote: Action<typeof quoteInputSchema, z.ZodAny> = {
 export const dataGetDepth: Action<undefined, z.ZodAny> = {
   name: "data_get_depth",
   shortDescription: "Get market depth (DOM)",
-  description: "Retrieves the Order Book / Depth of Market data if the panel is open.",
+  description:
+    "Retrieves the Order Book / Depth of Market data if the panel is open.",
   action: async () => {
     return getDepth();
   },
@@ -102,7 +114,8 @@ export const dataGetDepth: Action<undefined, z.ZodAny> = {
 export const dataGetStudyValues: Action<undefined, z.ZodAny> = {
   name: "data_get_study_values",
   shortDescription: "Get latest study values",
-  description: "Retrieves the most recent values for all visible indicators on the chart.",
+  description:
+    "Retrieves the most recent values for all visible indicators on the chart.",
   action: async () => {
     return getStudyValues();
   },
@@ -113,10 +126,14 @@ const pineGraphicsInputSchema = z.object({
   verbose: z.boolean().optional().describe("Include detailed coordinate data"),
 });
 
-export const dataGetPineLines: Action<typeof pineGraphicsInputSchema, z.ZodAny> = {
+export const dataGetPineLines: Action<
+  typeof pineGraphicsInputSchema,
+  z.ZodAny
+> = {
   name: "data_get_pine_lines",
   shortDescription: "Get Pine Script lines",
-  description: "Retrieves line drawings created by Pine Scripts (e.g. SR levels).",
+  description:
+    "Retrieves line drawings created by Pine Scripts (e.g. SR levels).",
   inputSchema: pineGraphicsInputSchema,
   action: async (input) => {
     return getPineLines(input);
@@ -127,17 +144,21 @@ const pineLabelsInputSchema = pineGraphicsInputSchema.extend({
   max_labels: z.number().optional(),
 });
 
-export const dataGetPineLabels: Action<typeof pineLabelsInputSchema, z.ZodAny> = {
-  name: "data_get_pine_labels",
-  shortDescription: "Get Pine Script labels",
-  description: "Retrieves label drawings create by Pine Scripts.",
-  inputSchema: pineLabelsInputSchema,
-  action: async (input) => {
-    return getPineLabels(input);
-  },
-};
+export const dataGetPineLabels: Action<typeof pineLabelsInputSchema, z.ZodAny> =
+  {
+    name: "data_get_pine_labels",
+    shortDescription: "Get Pine Script labels",
+    description: "Retrieves label drawings create by Pine Scripts.",
+    inputSchema: pineLabelsInputSchema,
+    action: async (input) => {
+      return getPineLabels(input);
+    },
+  };
 
-export const dataGetPineTables: Action<z.ZodObject<{ study_filter: z.ZodOptional<z.ZodString> }>, z.ZodAny> = {
+export const dataGetPineTables: Action<
+  z.ZodObject<{ study_filter: z.ZodOptional<z.ZodString> }>,
+  z.ZodAny
+> = {
   name: "data_get_pine_tables",
   shortDescription: "Get Pine Script tables",
   description: "Retrieves table data created by Pine Scripts.",

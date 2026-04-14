@@ -1,9 +1,4 @@
-import {
-  evaluate,
-  evaluateAsync,
-  KNOWN_PATHS,
-  safeString,
-} from "../connection.js";
+import { evaluate, KNOWN_PATHS, safeString } from "../connection.js";
 
 const MAX_OHLCV_BARS = 500;
 const MAX_TRADES = 20;
@@ -11,27 +6,36 @@ const CHART_API = KNOWN_PATHS.chartApi;
 const BARS_PATH = KNOWN_PATHS.mainSeriesBars;
 
 export async function getStrategyPerformance() {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const results = await evaluate(function getStrategyPerformance() {
-    if (window.TV_CONFIG.isDebug) debugger;
     const api = window.TradingViewApi._activeChartWidgetWV.value();
     const chart = api._chartWidget;
     if (!chart) return { error: "Chart widget not found" };
 
-    const sources = chart.model().model().dataSources() as any[];
+    const sources = chart.model().model().dataSources();
 
     const strategies = sources.filter(
       (source) => source.reportData && source.performance,
     );
 
-    if (!strategies || strategies.length === 0)
+    if (strategies.length === 0) {
       return {
         metrics: {},
         source: "internal_api",
         error: "No strategy found on chart. Add a strategy indicator first.",
       };
+    }
 
     let performance = {};
-    const primary = strategies[0];
+    const primary = strategies.find((s) => s.isStarted());
+
+    if (!primary)
+      return {
+        metrics: {},
+        source: "internal_api",
+        error:
+          "No active strategy found on chart. Ensure a strategy is loaded and running.",
+      };
 
     if (primary.reportData) {
       const rd =

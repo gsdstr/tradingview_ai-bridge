@@ -18,7 +18,7 @@ interface EvaluateOptions {
 let client: CDP.Client | null = null;
 let targetInfo: Target | null = null;
 const CDP_HOST = "localhost";
-const CDP_PORT = 9222;
+const CDP_PORT = 9223;
 const MAX_RETRIES = 5;
 const BASE_DELAY = 500;
 
@@ -94,11 +94,11 @@ async function attemptConnection(): Promise<CDP.Client> {
   ]);
 
   // Inject the Bridge Configuration into the renderer's global scope.
-  const bootstrap = `
-    window.TV_CONFIG = ${JSON.stringify(KNOWN_PATHS)};
-    window.TV_CONFIG.isDebug = ${process.env.TV_DEBUG === "1"};
-    console.log('--- TradingView MCP Bridge Initialized ---');
-  `;
+  const bootstrap = `function bootstrap(){
+      window.TV_CONFIG = ${JSON.stringify(KNOWN_PATHS)};
+      window.TV_CONFIG.isDebug = ${process.env.TV_DEBUG === "1"};
+      console.log('--- TradingView MCP Bridge Initialized ---');
+    }`;
 
   // We need to set targetInfo/client before calling evaluate
   targetInfo = target;

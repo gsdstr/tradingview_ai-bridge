@@ -141,7 +141,7 @@ export interface LaunchResult {
 export async function launch(
   options: { port?: number; kill_existing?: boolean } = {},
 ): Promise<LaunchResult> {
-  const cdpPort = options.port ?? 9222;
+  const cdpPort = options.port ?? 9223;
   const killFirst = options.kill_existing !== false;
   const platform = process.platform;
   const tvPath = findTradingViewExecutable(platform);
