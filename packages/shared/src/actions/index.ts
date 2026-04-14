@@ -40,6 +40,8 @@ import {
 } from "./drawing.js";
 import {
   indicatorSetInputs,
+  indicatorGetInputs,
+  indicatorGetInputsInfo,
   indicatorToggleVisibility,
   indicatorList,
 } from "./indicators.js";
@@ -133,6 +135,8 @@ export const actionRegistry: Record<string, Action<any, any>> = {
 
   // Indicators
   [indicatorSetInputs.name]: indicatorSetInputs,
+  [indicatorGetInputs.name]: indicatorGetInputs,
+  [indicatorGetInputsInfo.name]: indicatorGetInputsInfo,
   [indicatorToggleVisibility.name]: indicatorToggleVisibility,
   [indicatorList.name]: indicatorList,
 

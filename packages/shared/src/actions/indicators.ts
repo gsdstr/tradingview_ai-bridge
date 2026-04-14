@@ -1,10 +1,18 @@
 import { z } from "zod";
 import type { Action } from "./action.js";
-import { list, setInputs, toggleVisibility } from "../core/indicators.js";
+import {
+  getInputs,
+  getInputsInfo,
+  list,
+  setInputs,
+  toggleVisibility,
+} from "../core/indicators.js";
 
 const inputsInputSchema = z.object({
   entity_id: z.string().describe("Indicator ID"),
-  inputs: z.any().describe("Settings object (e.g. { length: 20 })"),
+  inputs: z
+    .any()
+    .describe('JSON string of inputs (ex. \'{"in_0": 4, "in_2": 170}\')'),
 });
 
 export const indicatorSetInputs: Action<typeof inputsInputSchema, z.ZodAny> = {
@@ -14,6 +22,41 @@ export const indicatorSetInputs: Action<typeof inputsInputSchema, z.ZodAny> = {
   inputSchema: inputsInputSchema,
   action: async (input) => {
     return setInputs(input);
+  },
+};
+
+const getInputsInputSchema = z.object({
+  entity_id: z.string().describe("Indicator ID"),
+});
+
+export const indicatorGetInputs: Action<typeof getInputsInputSchema, z.ZodAny> =
+  {
+    name: "indicator_get-inputs",
+    shortDescription: "Get current indicator settings",
+    description:
+      "Returns the current input parameters for a specific indicator.",
+    inputSchema: getInputsInputSchema,
+    action: async (input) => {
+      return getInputs(input);
+    },
+  };
+
+const getInputsInfoSchema = z.object({
+  entity_id: z.string().describe("Indicator ID"),
+  hidden: z.boolean().optional().describe("Include hidden inputs"),
+});
+
+export const indicatorGetInputsInfo: Action<
+  typeof getInputsInfoSchema,
+  z.ZodAny
+> = {
+  name: "indicator_get-inputs-info",
+  shortDescription: "Get detailed indicator input metadata",
+  description:
+    "Returns metadata (names, types, groups) for a specific indicator's inputs.",
+  inputSchema: getInputsInfoSchema,
+  action: async (input) => {
+    return getInputsInfo(input);
   },
 };
 

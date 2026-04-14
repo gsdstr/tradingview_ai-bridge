@@ -97,7 +97,23 @@ export function createParser() {
     parser.command(
       action.name,
       action.shortDescription,
-      (y) => y,
+      (y) => {
+        if (action.inputSchema && "~standard" in action.inputSchema) {
+          const schema = action.inputSchema["~standard"].types
+            ? action.inputSchema["~standard"].types.input
+            : action.inputSchema.shape;
+
+          if (schema) {
+            for (const [key, value] of Object.entries(schema)) {
+              y.option(key, {
+                describe: (value as any).description || "",
+                type: "string", // Default to string, logic can be refined for booleans/numbers
+              });
+            }
+          }
+        }
+        return y;
+      },
       createHandler(action),
     );
   }
@@ -114,7 +130,24 @@ export function createParser() {
           yargsGroup.command(
             subCommandName,
             action.shortDescription,
-            (sub) => sub,
+            (sub) => {
+              if (action.inputSchema && "~standard" in action.inputSchema) {
+                // Accessing the internal Zod shape via standard-schema spec
+                const shape = action.inputSchema.shape;
+                if (shape) {
+                  for (const [key, value] of Object.entries(shape)) {
+                    sub.option(key, {
+                      describe: (value as any).description || "",
+                      type:
+                        (value as any)._def?.typeName === "ZodBoolean"
+                          ? "boolean"
+                          : "string",
+                    });
+                  }
+                }
+              }
+              return sub;
+            },
             createHandler(action),
           );
         }
