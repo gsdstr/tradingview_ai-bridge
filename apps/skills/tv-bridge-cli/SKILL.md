@@ -4,8 +4,9 @@ Instructions for AI agents to interact with the TradingView AI Bridge via the co
 
 ## Tool Location
 
-The CLI is located at: `scripts/tv-bridge-cli.mjs`.
-Execute it using Node.js: `node scripts/tv-bridge-cli.mjs <command> [args]`.
+The cli script live in `tv-bridge-cli/scripts/tv-bridge-cli.mjs` (adjacent to this SKILL.md). If the path is not immediately available, search for `tv-bridge-cli/scripts/tv-bridge-cli.mjs`.
+
+Execute it using Node.js: `cd tv-bridge-cli/ && node scripts/tv-bridge-cli.mjs <command> [args]`.
 
 ## Core Commands
 
