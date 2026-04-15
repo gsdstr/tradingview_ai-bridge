@@ -3,8 +3,14 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "dist/tv-bridge-cli.mjs"
+  ],
   "bin": {
-    "tv-bridge-cli": "./dist/tv-bridge-cli.js"
+    "tv-bridge-cli": "./dist/tv-bridge-cli.mjs"
   },
   "scripts": {
     "dev": "tsx src/index.ts",

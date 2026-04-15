@@ -18,7 +18,7 @@ const config = {
   platform: "node",
   target: "node22",
   format: "esm",
-  outfile: "dist/tv-bridge-cli.js",
+  outfile: "dist/tv-bridge-cli.mjs",
   minify: true,
   sourcemap: isDebug,
   banner: {
@@ -30,7 +30,7 @@ console.log(`🔨 Building CLI (mode: ${isDebug ? "debug" : "production"})...`);
 
 try {
   await esbuild.build(config);
-  console.log("✅ Build complete: dist/tv-bridge-cli.js");
+  console.log("✅ Build complete: dist/tv-bridge-cli.mjs");
 } catch (error) {
   console.error("❌ Build failed:");
   console.error(error);

@@ -1,6 +1,10 @@
 import yargs from "yargs";
+import { createRequire } from "module";
 import { actionRegistry, getErrorMessage, disconnect } from "@repo/shared";
 import type { Action } from "@repo/shared";
+
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json");
 
 /**
  * Shared action handler logic factory
@@ -65,6 +69,8 @@ export function createParser() {
     .strict() // Fail on unknown commands
     .help()
     .alias("h", "help")
+    .version(pkg.version)
+    .alias("v", "version")
     .exitProcess(false) // Do not exit process directly on parse; better for tests
     .fail((msg, err) => {
       // Custom failure handler to avoid unintended process exits in tests

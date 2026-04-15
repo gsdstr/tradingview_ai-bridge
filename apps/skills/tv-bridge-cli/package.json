@@ -5,6 +5,6 @@
   "private": true,
   "description": "Agent Skill for TradingView AI Bridge CLI",
   "scripts": {
-    "build": "pnpm --filter cli bundle && mkdir -p scripts && cp ../../cli/dist/tv-bridge-cli.js ./scripts/"
+    "build": "pnpm --filter cli bundle && mkdir -p scripts && cp ../../cli/dist/tv-bridge-cli.mjs ./scripts/"
   }
 }

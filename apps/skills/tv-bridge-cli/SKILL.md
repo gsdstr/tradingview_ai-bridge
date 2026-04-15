@@ -4,29 +4,29 @@ Instructions for AI agents to interact with the TradingView AI Bridge via the co
 
 ## Tool Location
 
-The CLI is located at: `scripts/tv-bridge-cli.js`.
-Execute it using Node.js: `node scripts/tv-bridge-cli.js <command> [args]`.
+The CLI is located at: `scripts/tv-bridge-cli.mjs`.
+Execute it using Node.js: `node scripts/tv-bridge-cli.mjs <command> [args]`.
 
 ## Core Commands
 
 ### `tv` (TradingView Operations)
 
-- **`node scripts/tv-bridge-cli.js tv launch`**: Launches TradingView Desktop with CDP enabled (default port 9222).
+- **`node scripts/tv-bridge-cli.mjs tv launch`**: Launches TradingView Desktop with CDP enabled (default port 9222).
   - Optional flag: `--kill-existing` (bool) to kill running instances first.
 
-- **`node scripts/tv-bridge-cli.js tv health`**: Verifies the connection to TradingView.
+- **`node scripts/tv-bridge-cli.mjs tv health`**: Verifies the connection to TradingView.
   - Returns JSON with `cdp_connected`, `api_available`, and current chart details (symbol, resolution).
 
 ### `watchlist` (Watchlist Management)
 
-- **`node scripts/tv-bridge-cli.js watchlist get`**: Returns the list of symbols in the currently open TradingView watchlist.
+- **`node scripts/tv-bridge-cli.mjs watchlist get`**: Returns the list of symbols in the currently open TradingView watchlist.
 
-- **`node scripts/tv-bridge-cli.js watchlist add --symbol <SYMBOL>`**: Adds a symbol to the current watchlist.
-  - Example: `node scripts/tv-bridge-cli.js watchlist add --symbol NASDAQ:TSLA`.
+- **`node scripts/tv-bridge-cli.mjs watchlist add --symbol <SYMBOL>`**: Adds a symbol to the current watchlist.
+  - Example: `node scripts/tv-bridge-cli.mjs watchlist add --symbol NASDAQ:TSLA`.
 
 ### `info` (System Information)
 
-- **`node scripts/tv-bridge-cli.js info`**: Returns application metadata and connection status.
+- **`node scripts/tv-bridge-cli.mjs info`**: Returns application metadata and connection status.
 
 ## Usage Guidelines
 
@@ -37,7 +37,7 @@ Execute it using Node.js: `node scripts/tv-bridge-cli.js <command> [args]`.
 
 ## Example Workflow
 
-1.  Check status: `node scripts/tv-bridge-cli.js tv health`.
-2.  If not connected: `node scripts/tv-bridge-cli.js tv launch`.
-3.  Add symbol: `node scripts/tv-bridge-cli.js watchlist add --symbol TSLA`.
-4.  Verify list: `node scripts/tv-bridge-cli.js watchlist get`.
+1.  Check status: `node scripts/tv-bridge-cli.mjs tv health`.
+2.  If not connected: `node scripts/tv-bridge-cli.mjs tv launch`.
+3.  Add symbol: `node scripts/tv-bridge-cli.mjs watchlist add --symbol TSLA`.
+4.  Verify list: `node scripts/tv-bridge-cli.mjs watchlist get`.
