@@ -24,6 +24,8 @@ export interface Indicator {
 }
 
 export * from "./connection.js";
+export * from "./known.js";
+export * from "./paths.js";
 export * from "./core/tv.js";
 export * from "./core/watchlist.js";
 export * from "./error.js";

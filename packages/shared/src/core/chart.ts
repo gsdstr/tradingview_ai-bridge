@@ -41,7 +41,7 @@ export async function getState(): Promise<{ success: boolean } & ChartState> {
       try {
         var allStudies = chart.getAllStudies();
         studies = allStudies.map(function(s) {
-          return { id: s.id, name: s.name || s.title || 'unknown' };
+          return { id: s.id, name: s.name ? s.name() : (s.title ? s.title() : 'unknown') };
         });
       } catch(e) {}
       return {

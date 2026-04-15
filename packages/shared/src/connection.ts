@@ -1,4 +1,6 @@
 import CDP from "chrome-remote-interface";
+import { getErrorMessage } from "./error.js";
+import { KNOWN_PATHS } from "./paths.js";
 
 interface Target {
   id: string;
@@ -17,26 +19,11 @@ interface EvaluateOptions {
 
 let client: CDP.Client | null = null;
 let targetInfo: Target | null = null;
-const CDP_HOST = "localhost";
-const CDP_PORT = 9223;
+
+const CDP_HOST = process.env.TV_CDP_HOST ?? "localhost";
+const CDP_PORT = Number(process.env.TV_CDP_PORT) || 9223;
 const MAX_RETRIES = 5;
 const BASE_DELAY = 500;
-
-// Known direct API paths discovered via live probing
-export const KNOWN_PATHS = {
-  chartApi: "window.TradingViewApi._activeChartWidgetWV.value()",
-  chartWidgetCollection: "window.TradingViewApi._chartWidgetCollection",
-  bottomWidgetBar: "window.TradingView.bottomWidgetBar",
-  replayApi: "window.TradingViewApi._replayApi",
-  alertService: "window.TradingViewApi._alertService",
-  chartApiInstance: "window.ChartApiInstance",
-  mainSeriesBars:
-    "window.TradingViewApi._activeChartWidgetWV.value()._chartWidget.model().mainSeries().bars()",
-  strategyStudy: "chart._chartWidget.model().model().dataSources()",
-  layoutManager: "window.TradingViewApi.getSavedCharts",
-  symbolSearchApi: "window.TradingViewApi.searchSymbols",
-  pineFacadeApi: "https://pine-facade.tradingview.com/pine-facade",
-};
 
 /**
  * Sanitize a string for safe interpolation into JavaScript code evaluated via CDP.
@@ -86,6 +73,14 @@ async function attemptConnection(): Promise<CDP.Client> {
     target: target.id,
   });
 
+  // Handle disconnection event
+  newClient.on("disconnect", () => {
+    if (client === newClient) {
+      client = null;
+      targetInfo = null;
+    }
+  });
+
   // Enable required domains
   await Promise.all([
     newClient.Runtime.enable(),
@@ -93,20 +88,24 @@ async function attemptConnection(): Promise<CDP.Client> {
     newClient.DOM.enable(),
   ]);
 
-  // Inject the Bridge Configuration into the renderer's global scope.
-  const bootstrap = `function bootstrap(){
+  // Persistent configuration: ensures TV_CONFIG survives refreshes
+  const bootstrap = `
       window.TV_CONFIG = ${JSON.stringify(KNOWN_PATHS)};
       window.TV_CONFIG.isDebug = ${process.env.TV_DEBUG === "1"};
       console.log('--- TradingView MCP Bridge Initialized ---');
-    }`;
+    `;
 
-  // We need to set targetInfo/client before calling evaluate
+  await newClient.Page.addScriptToEvaluateOnNewDocument({ source: bootstrap });
+
+  // Update shared state
   targetInfo = target;
   client = newClient;
 
   try {
+    // Immediate injection for current page state
     await evaluate(bootstrap);
   } catch (err) {
+    // Only cleanup if bootstrap fails during initial connection
     client = null;
     targetInfo = null;
     throw err;
@@ -119,22 +118,20 @@ async function attemptConnection(): Promise<CDP.Client> {
  * Establish a CDP connection with retry logic.
  */
 export async function connect(): Promise<CDP.Client> {
-  let lastError: Error | unknown;
+  let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       return await attemptConnection();
     } catch (err) {
-      lastError = err;
+      lastError = err as Error;
       const delay = Math.min(BASE_DELAY * Math.pow(2, attempt), 30000);
       await new Promise((r) => setTimeout(r, delay));
     }
   }
 
-  const errorMessage =
-    lastError instanceof Error ? lastError.message : String(lastError);
   throw new Error(
-    `CDP connection failed after ${MAX_RETRIES} attempts: ${errorMessage}`,
+    `CDP connection failed after ${MAX_RETRIES} attempts: ${getErrorMessage(lastError)}`,
   );
 }
 
@@ -165,59 +162,61 @@ async function evaluateRaw<T = any>(
   expression: string,
   opts: EvaluateOptions = {},
 ): Promise<T> {
-  const timeout = opts.timeout ?? 15000;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
+  const timeoutMs = opts.timeout ?? 15000;
+  const c = await getClient();
 
-  try {
-    const c = await getClient();
-    const result = await c.Runtime.evaluate({
+  // Implement real timeout using Promise.race
+  const result = await Promise.race([
+    c.Runtime.evaluate({
       expression,
       returnByValue: true,
       awaitPromise: opts.awaitPromise ?? false,
       userGesture: opts.userGesture ?? true,
       ...opts,
-    });
+    }),
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`JS evaluation timeout after ${timeoutMs}ms`)),
+        timeoutMs,
+      ),
+    ),
+  ]);
 
-    if (result.exceptionDetails) {
-      let msg =
-        (result.exceptionDetails.exception?.description ??
-          result.exceptionDetails.text) ||
-        "Unknown evaluation error";
+  if (result.exceptionDetails) {
+    let msg =
+      (result.exceptionDetails.exception?.description ??
+        result.exceptionDetails.text) ||
+      "Unknown evaluation error";
 
-      if (result.exceptionDetails.stackTrace) {
-        const stack = result.exceptionDetails.stackTrace.callFrames
-          .map(
-            (f) =>
-              `  at ${f.functionName} (${f.url}:${f.lineNumber}:${f.columnNumber})`,
-          )
-          .join("\n");
-        msg += `\nStack:\n${stack}`;
-      }
-
-      throw new Error(`JS evaluation error: ${msg}`);
+    if (result.exceptionDetails.stackTrace) {
+      const stack = result.exceptionDetails.stackTrace.callFrames
+        .map(
+          (f) =>
+            `  at ${f.functionName} (${f.url}:${f.lineNumber}:${f.columnNumber})`,
+        )
+        .join("\n");
+      msg += `\nStack:\n${stack}`;
     }
-    return result.result.value as T;
-  } finally {
-    clearTimeout(timer);
+
+    throw new Error(`JS evaluation error: ${msg}`);
   }
+  return result.result.value as T;
 }
 
 export async function evaluate<T = any>(
   fn: Function | string,
   opts: EvaluateOptions = {},
 ): Promise<T> {
-  const sourceName =
-    typeof fn === "function" ? fn.name || "anonymous" : "evaluate";
-  const fnStr = typeof fn === "function" ? fn.toString() : fn;
+  const isFunc = typeof fn === "function";
+  if (!isFunc) return evaluateRaw<T>(fn, opts);
 
-  return evaluateRaw<T>(
-    `
-    (${fnStr})()
+  const sourceName = fn.name || "anonymous";
+  const expression = `
+    (${fn.toString()})()
     //# sourceURL=${sourceName}.js
-  `,
-    opts,
-  );
+  `;
+
+  return evaluateRaw<T>(expression, opts);
 }
 
 export async function evaluateAsync<T = any>(expression: string): Promise<T> {
@@ -230,7 +229,7 @@ export async function disconnect(): Promise<void> {
   try {
     await client.close();
   } catch {
-    //TODO: log error to debug
+    // Best effort cleanup
   }
   client = null;
   targetInfo = null;
@@ -242,40 +241,6 @@ export async function isConnected(): Promise<boolean> {
     await client.Runtime.evaluate({ expression: "1", returnByValue: true });
     return true;
   } catch {
-    //TODO: log error to debug
+    return false;
   }
-  return false;
-}
-
-async function verifyAndReturn(path: string, name: string): Promise<string> {
-  const exists = await evaluate(
-    `typeof (${path}) !== 'undefined' && (${path}) !== null`,
-  );
-  if (!exists) {
-    throw new Error(`${name} not available at ${path}`);
-  }
-  return path;
-}
-
-export async function getChartApi(): Promise<string> {
-  return verifyAndReturn(KNOWN_PATHS.chartApi, "Chart API");
-}
-
-export async function getChartCollection(): Promise<string> {
-  return verifyAndReturn(
-    KNOWN_PATHS.chartWidgetCollection,
-    "Chart Widget Collection",
-  );
-}
-
-export async function getBottomBar(): Promise<string> {
-  return verifyAndReturn(KNOWN_PATHS.bottomWidgetBar, "Bottom Widget Bar");
-}
-
-export async function getReplayApi(): Promise<string> {
-  return verifyAndReturn(KNOWN_PATHS.replayApi, "Replay API");
-}
-
-export async function getMainSeriesBars(): Promise<string> {
-  return verifyAndReturn(KNOWN_PATHS.mainSeriesBars, "Main Series Bars");
 }

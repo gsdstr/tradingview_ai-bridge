@@ -1,4 +1,5 @@
-import { getClient, evaluate, getChartCollection } from "../connection.js";
+import { getClient, evaluate } from "../connection.js";
+import { getChartCollection } from "../known.js";
 import { writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";

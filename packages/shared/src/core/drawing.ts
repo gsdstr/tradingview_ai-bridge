@@ -1,4 +1,5 @@
-import { evaluate, getChartApi, safeString, requireFinite } from "../connection.js";
+import { evaluate, safeString, requireFinite } from "../connection.js";
+import { getChartApi } from "../known.js";
 
 export interface Point {
   time: number;

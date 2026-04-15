@@ -15,11 +15,32 @@ export interface DataSource {
   zorder?(): number;
 }
 
+export interface Study {
+  id: string;
+  name(): string;
+  title(): string;
+  setVisible(visible: boolean): void;
+  isVisible(): boolean;
+  getInputValues(): { id: string; value: any }[];
+  setInputValues(values: { id: string; value: any }[]): void;
+  getInputsInfo(): {
+    id: string;
+    name: string;
+    type: string;
+    value: any;
+    isHidden: boolean;
+    groupId: string;
+    min?: number;
+    max?: number;
+  }[];
+}
+
 export interface ChartWidget {
   symbol(): string;
   resolution(): string;
   chartType(): number | null;
-  getAllStudies(): any[];
+  getAllStudies(): Study[];
+  getStudyById(id: string): Study | null;
   /**
    * Internal model abstraction, dynamically discovered via CDP.
    */

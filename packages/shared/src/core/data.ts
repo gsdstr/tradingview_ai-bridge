@@ -1,4 +1,5 @@
-import { evaluate, KNOWN_PATHS, safeString } from "../connection.js";
+import { evaluate, safeString } from "../connection.js";
+import { KNOWN_PATHS } from "../paths.js";
 
 const MAX_OHLCV_BARS = 500;
 const MAX_TRADES = 20;

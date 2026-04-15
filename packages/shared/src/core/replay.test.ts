@@ -14,12 +14,13 @@ describe("replay core", () => {
   it("start() — date selection", async () => {
     const evaluateMock = vi.mocked(connection.evaluate);
     evaluateMock.mockImplementation(async (expr) => {
-      if (expr.includes("isReplayAvailable")) return true;
-      if (expr.includes("showReplayToolbar")) return undefined;
-      if (expr.includes("selectDate")) return "ok";
-      if (expr.includes("selectFirstAvailableDate")) return "ok";
-      if (expr.includes("isReplayStarted")) return true;
-      if (expr.includes("currentDate")) return 1700000000;
+      const e = typeof expr === "string" ? expr : expr.toString();
+      if (e.includes("isReplayAvailable")) return true;
+      if (e.includes("showReplayToolbar")) return undefined;
+      if (e.includes("selectDate")) return "ok";
+      if (e.includes("selectFirstAvailableDate")) return "ok";
+      if (e.includes("isReplayStarted")) return true;
+      if (e.includes("currentDate")) return 1700000000;
       return undefined;
     });
 
@@ -32,9 +33,10 @@ describe("replay core", () => {
   it("step() — doStep", async () => {
     const evaluateMock = vi.mocked(connection.evaluate);
     evaluateMock.mockImplementation(async (expr) => {
-      if (expr.includes("isReplayStarted")) return true;
-      if (expr.includes("currentDate")) return 1000;
-      if (expr.includes("doStep")) return undefined;
+      const e = typeof expr === "string" ? expr : expr.toString();
+      if (e.includes("isReplayStarted")) return true;
+      if (e.includes("currentDate")) return 1000;
+      if (e.includes("doStep")) return undefined;
       return undefined;
     });
 
@@ -46,8 +48,9 @@ describe("replay core", () => {
   it("stop() — stopReplay", async () => {
     const evaluateMock = vi.mocked(connection.evaluate);
     evaluateMock.mockImplementation(async (expr) => {
-      if (expr.includes("isReplayStarted")) return true;
-      if (expr.includes("stopReplay")) return undefined;
+      const e = typeof expr === "string" ? expr : expr.toString();
+      if (e.includes("isReplayStarted")) return true;
+      if (e.includes("stopReplay")) return undefined;
       return undefined;
     });
 

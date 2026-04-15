@@ -82,7 +82,7 @@ const listInputSchema = z.object({
   name: z
     .string()
     .optional()
-    .describe("Filter by indicator name (case-sensitive)"),
+    .describe("Filter by indicator name (case-insensitive)"),
 });
 
 export const indicatorList: Action<typeof listInputSchema, z.ZodAny> = {
