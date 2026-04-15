@@ -11,7 +11,7 @@ export async function list(options: { name?: string }): Promise<any> {
     const allStudies = activeChart.getAllStudies().map(function (s) {
       return {
         id: s.id,
-        name: s.name ? s.name() : s.title ? s.title() : "unknown",
+        name: typeof s.name === 'function' ? s.name() : (typeof s.name === 'string' ? s.name : (typeof s.title === 'function' ? s.title() : (s.title || "unknown"))),
       };
     });
     return {

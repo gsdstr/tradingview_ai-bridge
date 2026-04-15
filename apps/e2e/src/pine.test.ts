@@ -1,18 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import CDP from "chrome-remote-interface";
+import { getCDPConnection } from "./test-utils.js";
 import { pineGetSource } from "@repo/shared";
 
 describe("TradingView E2E — Pine Script", () => {
   let client: any;
 
   beforeAll(async () => {
-    try {
-      const targets = await CDP.List({ host: "localhost", port: 9222 });
-      const chartTarget = targets.find((t: any) => t.url && t.url.includes("tradingview.com/chart"));
-      if (chartTarget) {
-        client = await CDP({ host: "localhost", port: 9222, target: chartTarget.id });
-      }
-    } catch {}
+    client = await getCDPConnection();
   });
 
   afterAll(async () => {
