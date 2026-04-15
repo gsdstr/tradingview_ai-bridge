@@ -22,9 +22,10 @@ const stateOutputSchema = z.object({
 });
 
 export const chartGetState: Action<undefined, typeof stateOutputSchema> = {
-  name: "chart_get_state",
+  name: "chart_get-state",
   shortDescription: "Get current chart state",
-  description: "Retrieves the current symbol, resolution, chart type, and list of indicators.",
+  description:
+    "Retrieves the current symbol, resolution, chart type, and list of indicators.",
   outputSchema: stateOutputSchema,
   action: async () => {
     return getState();
@@ -41,7 +42,10 @@ const symbolOutputSchema = z.object({
   chart_ready: z.boolean(),
 });
 
-export const chartSetSymbol: Action<typeof symbolInputSchema, typeof symbolOutputSchema> = {
+export const chartSetSymbol: Action<
+  typeof symbolInputSchema,
+  typeof symbolOutputSchema
+> = {
   name: "chart_set_symbol",
   shortDescription: "Set chart symbol",
   description: "Changes the symbol on the active chart.",
@@ -62,7 +66,10 @@ const timeframeOutputSchema = z.object({
   chart_ready: z.boolean(),
 });
 
-export const chartSetTimeframe: Action<typeof timeframeInputSchema, typeof timeframeOutputSchema> = {
+export const chartSetTimeframe: Action<
+  typeof timeframeInputSchema,
+  typeof timeframeOutputSchema
+> = {
   name: "chart_set_timeframe",
   shortDescription: "Set chart timeframe",
   description: "Changes the timeframe (resolution) on the active chart.",
@@ -74,7 +81,9 @@ export const chartSetTimeframe: Action<typeof timeframeInputSchema, typeof timef
 };
 
 const typeInputSchema = z.object({
-  chart_type: z.union([z.string(), z.number()]).describe("Type name (Candles, Line, etc.) or number (0-9)"),
+  chart_type: z
+    .union([z.string(), z.number()])
+    .describe("Type name (Candles, Line, etc.) or number (0-9)"),
 });
 
 export const chartSetType: Action<typeof typeInputSchema, z.ZodAny> = {
@@ -94,10 +103,14 @@ const indicatorInputSchema = z.object({
   inputs: z.any().optional().describe("Simplified inputs object"),
 });
 
-export const chartManageIndicator: Action<typeof indicatorInputSchema, z.ZodAny> = {
+export const chartManageIndicator: Action<
+  typeof indicatorInputSchema,
+  z.ZodAny
+> = {
   name: "chart_manage_indicator",
   shortDescription: "Add or remove indicator",
-  description: "Adds a new indicator or removes an existing one from the chart.",
+  description:
+    "Adds a new indicator or removes an existing one from the chart.",
   inputSchema: indicatorInputSchema,
   action: async (input) => {
     return manageIndicator(input);
@@ -107,7 +120,8 @@ export const chartManageIndicator: Action<typeof indicatorInputSchema, z.ZodAny>
 export const chartGetVisibleRange: Action<undefined, z.ZodAny> = {
   name: "chart_get_visible_range",
   shortDescription: "Get visible bars range",
-  description: "Retrieves the time range and bar indices currently visible on the chart.",
+  description:
+    "Retrieves the time range and bar indices currently visible on the chart.",
   action: async () => {
     return getVisibleRange();
   },
@@ -129,7 +143,9 @@ export const chartSetVisibleRange: Action<typeof rangeInputSchema, z.ZodAny> = {
 };
 
 const scrollInputSchema = z.object({
-  date: z.union([z.string(), z.number()]).describe("Date string or unix timestamp"),
+  date: z
+    .union([z.string(), z.number()])
+    .describe("Date string or unix timestamp"),
 });
 
 export const chartScrollToDate: Action<typeof scrollInputSchema, z.ZodAny> = {

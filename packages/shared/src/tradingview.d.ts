@@ -5,7 +5,7 @@ Version 2.14.0 • 10/16/2025
 
 export interface DataSource {
   isStarted(): boolean;
-  name(): string;
+  name: string;
   reportData?: (() => { performance: any }) | { performance: any };
   performance?: any;
   _id?: string;
@@ -17,8 +17,8 @@ export interface DataSource {
 
 export interface Study {
   id: string;
-  name(): string;
-  title(): string;
+  name: string;
+  title: string;
   setVisible(visible: boolean): void;
   isVisible(): boolean;
   getInputValues(): { id: string; value: any }[];

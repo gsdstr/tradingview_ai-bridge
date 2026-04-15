@@ -45,7 +45,7 @@ export async function getStrategyPerformance() {
           : primary.reportData;
       performance = rd.performance;
     }
-    return { performance: performance, source: primary.name() };
+    return { performance: performance, source: primary.name };
   });
   return {
     success: true,

@@ -11,7 +11,7 @@ export async function list(options: { name?: string }): Promise<any> {
     const allStudies = activeChart.getAllStudies().map(function (s) {
       return {
         id: s.id,
-        name: typeof s.name === 'function' ? s.name() : (typeof s.name === 'string' ? s.name : (typeof s.title === 'function' ? s.title() : (s.title || "unknown"))),
+        name: s.name || s.title || "unknown",
       };
     });
     return {
@@ -93,7 +93,7 @@ export async function getInputs(options: { entity_id: string }): Promise<any> {
       for (var i = 0; i < currentInputs.length; i++) {
         inputs[currentInputs[i].id] = currentInputs[i].value;
       }
-      return { inputs: inputs, name: study.name ? study.name() : (study.title ? study.title() : "unknown") };
+      return { inputs: inputs, name: study.name || study.title || "unknown" };
     })()
   `);
 
@@ -130,7 +130,7 @@ export async function getInputsInfo(options: {
           max: input.max,
         };
       });
-      return { inputs: inputs, name: study.name ? study.name() : (study.title ? study.title() : "unknown") };
+      return { inputs: inputs, name: study.name || study.title || "unknown" };
     })()
   `);
 
