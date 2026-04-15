@@ -32,6 +32,7 @@ This monorepo is managed by [Turborepo](https://turbo.build/) and uses the **Sha
 - **`apps/cli`**: A dynamic CLI built with [Yargs](https://yargs.js.org/). It automatically transforms shared actions into commands and subcommands (e.g., `watchlist get`).
 - **`apps/mcp`**: A [Model Context Protocol](https://modelcontextprotocol.io/) server that dynamically exposes shared actions as tools for AI agents.
 - **`apps/skills`**: Pre-configured **Agent Skills** that bundle tools (like the CLI) and instructions for autonomous agents.
+- **`apps/e2e`**: E2E tests for the bridge.
 - **`packages/shared`**: The heart of the project. Contains:
   - `src/actions/`: Core business logic defined using the `Action` interface and `StandardSchemaV1` (Zod).
   - `src/core/`: Internal TradingView bridge logic (CDP, watchlist manipulation, etc.).
@@ -41,25 +42,28 @@ This monorepo is managed by [Turborepo](https://turbo.build/) and uses the **Sha
 
 The following actions are defined in `@repo/shared` and available via both the CLI and MCP:
 
-| Domain | CLI Command | Description |
-| :--- | :--- | :--- |
-| **TradingView** | `tv launch` | Launch TradingView Desktop with remote debugging (CDP) enabled. |
-| **Watchlist** | `watchlist get` | Fetch the currently open symbol watchlist from the TradingView UI. |
-| **Watchlist** | `watchlist add` | Add a new symbol to your current TradingView watchlist. |
-| **System** | `health` | Verify the CDP connection and TradingView API availability. |
-| **System** | `info` | Show application metadata and connection status. |
+| Domain          | CLI Command     | Description                                                        |
+| :-------------- | :-------------- | :----------------------------------------------------------------- |
+| **TradingView** | `tv launch`     | Launch TradingView Desktop with remote debugging (CDP) enabled.    |
+| **Watchlist**   | `watchlist get` | Fetch the currently open symbol watchlist from the TradingView UI. |
+| **Watchlist**   | `watchlist add` | Add a new symbol to your current TradingView watchlist.            |
+
+...
 
 ## 🤖 Agent Skills
 
 This repository provides pre-built "Skills" for AI agents (like Claude Code or Antigravity) to enable autonomous interaction with TradingView.
 
 ### CLI Skill (`apps/skills/tv-bridge-cli`)
+
 A standalone, dependency-free bundle of the `tv-bridge-cli`. It includes a dedicated `SKILL.md` that teaches the agent how to launch TradingView, check chart status, and manipulate watchlists.
 
 ### MCP Skill (`apps/skills/tv-bridge-mcp`)
+
 A standalone bundle of the TradingView MCP server. It provides all bridge actions as tools to the agent via the Model Context Protocol.
 
-To install/build both skills:
+To build skills:
+
 ```bash
 pnpm --filter @repo/skill-tv-bridge-cli run build
 pnpm --filter @repo/skill-tv-bridge-mcp run build
@@ -79,18 +83,24 @@ This project uses modern tooling for developer experience:
 This monorepo follows modern testing best practices to ensure stability across core logic and E2E automation.
 
 ### 🧩 Unit Testing (Colocated)
+
 Unit tests for core logic are colocated with the source code in `packages/shared/src/`. This ensures that logic and its verification stay in sync.
+
 - **Location**: `packages/shared/src/**/*.test.ts`
 - **Runner**: [Vitest](https://vitest.dev/)
 - **Command**: `pnpm --filter @repo/shared test`
 
 ### 🏗️ End-to-End (E2E) Testing
+
 E2E tests interact with a real TradingView Desktop instance. They are isolated in a dedicated package to separate environment-dependent tests from pure logic.
+
 - **Location**: `apps/e2e/src/`
 - **Requirements**: TradingView Desktop running with `--remote-debugging-port=9222`.
 - **Runner**: [Vitest](https://vitest.dev/)
 - **Command**: `pnpm --filter @repo/e2e test`
 
-### ⚡ Monorepo Execution (Turborepo)
+## ⚡ Monorepo Execution (Turborepo)
+
 We use [Turborepo](https://turbo.build/) to manage tests across all packages. This enables caching and parallel execution.
+
 - **Command**: `pnpm turbo test` (runs all unit, integration, and E2E tests).
