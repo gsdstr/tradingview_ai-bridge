@@ -39,3 +39,7 @@ yarn-error.log*
 *.pem
 
 tmp
+
+# Project-local agent state
+/.planning/
+/skills-lock.json
