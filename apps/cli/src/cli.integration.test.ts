@@ -8,7 +8,7 @@ const CLI_PATH = join(__dirname, "..", "src", "index.ts");
 
 describe("CLI Integration", () => {
   it("shows help output", async () => {
-    const { stdout } = await execa("pnpm", ["tsx", CLI_PATH, "--help"]);
+    const { stdout } = await execa("bun", ["tsx", CLI_PATH, "--help"]);
     expect(stdout).toContain("tv-cli <cmd> [args]");
     expect(stdout).toContain("tv");
     expect(stdout).toContain("watchlist");
@@ -16,7 +16,7 @@ describe("CLI Integration", () => {
   });
 
   it("shows help for subcommands", async () => {
-    const { stdout } = await execa("pnpm", ["tsx", CLI_PATH, "tv", "--help"]);
+    const { stdout } = await execa("bun", ["tsx", CLI_PATH, "tv", "--help"]);
     expect(stdout).toContain("tv-cli tv");
     expect(stdout).toContain("launch");
     expect(stdout).toContain("health");
@@ -24,7 +24,7 @@ describe("CLI Integration", () => {
 
   it("returns non-zero exit code for unknown command", async () => {
     try {
-      await execa("pnpm", ["tsx", CLI_PATH, "unknown-cmd"]);
+      await execa("bun", ["tsx", CLI_PATH, "unknown-cmd"]);
       // Should not reach here
       expect(true).toBe(false);
     } catch (error: any) {
@@ -36,7 +36,7 @@ describe("CLI Integration", () => {
   });
 
   it("executes standalone command (info)", async () => {
-    const { stdout, exitCode } = await execa("pnpm", ["tsx", CLI_PATH, "info"]);
+    const { stdout, exitCode } = await execa("bun", ["tsx", CLI_PATH, "info"]);
     expect(exitCode).toBe(0);
     const output = JSON.parse(stdout);
     expect(output.application).toBeDefined();

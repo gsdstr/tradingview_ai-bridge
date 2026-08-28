@@ -1,0 +1,3 @@
+[install]
+# Existing workspace scripts resolve shared tooling from the root node_modules.
+linker = "hoisted"

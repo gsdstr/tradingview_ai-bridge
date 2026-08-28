@@ -5,6 +5,7 @@ This skill provides AI agents with a standalone, dependency-free Model Context P
 ## Overview
 
 The `tv-bridge-mcp` allows agents to access all TradingView bridge actions as unified "tools". It supports the following features via MCP:
+
 - **Watching Charts**: Automatically syncs with the active chart in TradingView.
 - **Watchlist Access**: Get and modify symbols in the UI.
 - **System Checks**: Verify CDP bridge health.
@@ -21,7 +22,9 @@ Agents should add this MCP server to their configuration file (e.g., `clap.json`
 ## Development
 
 To rebuild the standalone MCP script within this skill:
+
 ```bash
-pnpm run build
+bun run build
 ```
+
 This will bundle the core MCP server from `apps/mcp` and copy it to the local `scripts/` directory.

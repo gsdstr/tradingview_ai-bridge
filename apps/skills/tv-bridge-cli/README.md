@@ -25,7 +25,7 @@ This skill is designed to be added to an agent's workspace. Once added, the agen
 To rebuild the standalone CLI script within this skill:
 
 ```bash
-pnpm run build
+bun run build
 ```
 
 This will bundle the core CLI from `apps/cli` and copy it to the local `scripts/` directory.

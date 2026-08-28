@@ -11,20 +11,34 @@
     "lint:fix": "turbo run lint --continue -- --fix --cache --cache-location .cache/.eslintcache",
     "typecheck": "turbo run typecheck",
     "test": "vitest run",
-    "cli": "pnpm --filter cli dev",
-    "mcp": "pnpm --filter mcp dev",
-    "shared": "pnpm --filter @repo/shared"
+    "cli": "bun --filter cli dev",
+    "mcp": "bun --filter mcp dev",
+    "shared": "bun --filter @repo/shared test"
   },
   "devDependencies": {
     "@repo/prettier": "workspace:*",
     "prettier": "^3.7.4",
-    "turbo": "^2.9.5",
+    "turbo": "2.10.12",
     "typescript": "5.9.2",
     "vitest": "^4.1.4"
   },
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "bun@1.3.14",
   "engines": {
     "node": ">=22",
-    "pnpm": ">=10.33.0"
+    "bun": ">=1.3.14"
+  },
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "apps/skills/*",
+      "packages/*",
+      "tooling/*"
+    ],
+    "catalog": {
+      "@eslint/js": "^9.39.1",
+      "@types/node": "^22.15.3",
+      "prettier": "^3.7.4",
+      "typescript": "^5.9.2"
+    }
   }
 }

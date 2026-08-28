@@ -42,7 +42,7 @@
       "name": "Debug Tests (e2e)",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "bun",
       "runtimeArgs": ["--filter", "@repo/e2e", "test"],
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"]

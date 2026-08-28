@@ -65,15 +65,15 @@ A standalone bundle of the TradingView MCP server. It provides all bridge action
 To build skills:
 
 ```bash
-pnpm --filter @repo/skill-tv-bridge-cli run build
-pnpm --filter @repo/skill-tv-bridge-mcp run build
+bun --filter @repo/skill-tv-bridge-cli run build
+bun --filter @repo/skill-tv-bridge-mcp run build
 ```
 
 ## Utilities
 
 This project uses modern tooling for developer experience:
 
-- [pnpm](https://pnpm.io/) for fast, disk-efficient package management.
+- [Bun](https://bun.sh/) for package management and workspace scripts.
 - [TypeScript](https://www.typescriptlang.org/) for strict type safety.
 - [Zod](https://zod.dev/) and [StandardSchemaV1](https://github.com/standard-schema/spec) for runtime validation.
 - [ESLint](https://eslint.org/) and [Prettier](https://prettier.io) for code quality.
@@ -88,7 +88,7 @@ Unit tests for core logic are colocated with the source code in `packages/shared
 
 - **Location**: `packages/shared/src/**/*.test.ts`
 - **Runner**: [Vitest](https://vitest.dev/)
-- **Command**: `pnpm --filter @repo/shared test`
+- **Command**: `bun --filter @repo/shared test`
 
 ### 🏗️ End-to-End (E2E) Testing
 
@@ -97,10 +97,10 @@ E2E tests interact with a real TradingView Desktop instance. They are isolated i
 - **Location**: `apps/e2e/src/`
 - **Requirements**: TradingView Desktop running with `--remote-debugging-port=9222`.
 - **Runner**: [Vitest](https://vitest.dev/)
-- **Command**: `pnpm --filter @repo/e2e test`
+- **Command**: `bun --filter @repo/e2e test`
 
 ## ⚡ Monorepo Execution (Turborepo)
 
 We use [Turborepo](https://turbo.build/) to manage tests across all packages. This enables caching and parallel execution.
 
-- **Command**: `pnpm turbo test` (runs all unit, integration, and E2E tests).
+- **Command**: `bunx turbo test` (runs all unit, integration, and E2E tests).
