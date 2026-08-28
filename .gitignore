@@ -43,3 +43,6 @@ tmp
 # Project-local agent state
 /.planning/
 /skills-lock.json
+
+# Local upstream checkout retained for manual sync review.
+/tradingview-mcp/
