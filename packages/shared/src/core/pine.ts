@@ -91,7 +91,7 @@ export function analyze(options: { source: string }): any {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line) continue;
-    const fromMatch = line.match(/(\w+)\s*=\s*array\.from\(([^)]*)\)/);
+    const fromMatch = /(\w+)\s*=\s*array\.from\(([^)]*)\)/.exec(line);
     if (fromMatch) {
       const name = fromMatch[1]?.trim();
       const args = fromMatch[2]?.trim();
@@ -100,7 +100,7 @@ export function analyze(options: { source: string }): any {
       arrays.set(name, { name, size, line: i + 1 });
       continue;
     }
-    const newMatch = line.match(/(\w+)\s*=\s*array\.new(?:<\w+>|_\w+)\((\d+)?/);
+    const newMatch = /(\w+)\s*=\s*array\.new(?:<\w+>|_\w+)\((\d+)?/.exec(line);
     if (newMatch) {
       const name = newMatch[1]?.trim();
       if (!name) continue;
@@ -134,8 +134,8 @@ export function analyze(options: { source: string }): any {
   }
 
   if (!isV6 && source.includes("//@version=")) {
-    const vMatch = source.match(/\/\/@version=(\d+)/);
-    if (vMatch && vMatch[1] && parseInt(vMatch[1]) < 5) {
+    const vMatch = /\/\/@version=(\d+)/.exec(source);
+    if (vMatch?.[1] && parseInt(vMatch[1]) < 5) {
       diagnostics.push({
         line: 1,
         column: 1,
@@ -178,7 +178,7 @@ export async function check(options: { source: string }): Promise<any> {
     throw new Error(`TradingView API returned ${response.status}: ${response.statusText}`);
   }
 
-  const result = (await response.json()) as any;
+  const result = (await response.json());
   const errors = [];
   const warnings = [];
   const inner = result?.result;

@@ -13,7 +13,7 @@ describe("TradingView E2E — Replay Mode", () => {
     // Ensure replay is stopped after tests 
     if (client) {
       try {
-        await replayStop.action(undefined as any);
+        await replayStop.action();
       } catch {}
       await client.close();
     }
@@ -35,17 +35,17 @@ describe("TradingView E2E — Replay Mode", () => {
     expect(startResult.success).toBe(true);
 
     // 2. Check Status
-    const statusResult = await replayStatus.action(undefined as any);
+    const statusResult = await replayStatus.action();
     expect(statusResult.success).toBe(true);
     expect(statusResult.active).toBe(true);
 
     // 3. Stop Replay
-    const stopResult = await replayStop.action(undefined as any);
+    const stopResult = await replayStop.action();
     expect(stopResult.success).toBe(true);
     expect(stopResult.stopped).toBe(true);
 
     // 4. Verify stopped
-    const finalStatus = await replayStatus.action(undefined as any);
+    const finalStatus = await replayStatus.action();
     expect(finalStatus.active).toBe(false);
   }, 30000); // 30s timeout for replay transitions
 });

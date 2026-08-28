@@ -1,62 +1,115 @@
-import yargs from "yargs";
 import { createRequire } from "module";
-import { actionRegistry, getErrorMessage, disconnect } from "@repo/shared";
 import type { Action } from "@repo/shared";
+import { actionRegistry, disconnect, getErrorMessage } from "@repo/shared";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
+import yargs from "yargs";
 
 const require = createRequire(import.meta.url);
-const pkg = require("../package.json");
+const pkg = require("../package.json") as { version?: string };
+
+type AnyAction = Action<
+  StandardSchemaV1 | undefined,
+  StandardSchemaV1 | undefined
+>;
+
+interface SchemaField {
+  description?: string;
+  _def?: {
+    typeName?: string;
+  };
+}
+
+interface ShapeHolder {
+  shape?: Record<string, SchemaField>;
+  "~standard"?: {
+    types?: {
+      input?: Record<string, SchemaField>;
+    };
+  };
+}
+
+function getOptionsFromSchema(
+  inputSchema: unknown,
+): Record<string, { describe: string; type: "string" | "boolean" }> {
+  if (!inputSchema || typeof inputSchema !== "object") {
+    return {};
+  }
+  const holder = inputSchema as ShapeHolder;
+  const shape = holder["~standard"]?.types?.input ?? holder.shape;
+  if (!shape || typeof shape !== "object") {
+    return {};
+  }
+
+  const options: Record<
+    string,
+    { describe: string; type: "string" | "boolean" }
+  > = {};
+  for (const [key, value] of Object.entries(shape)) {
+    const isBoolean = value._def?.typeName === "ZodBoolean";
+    options[key] = {
+      describe: value.description ?? "",
+      type: isBoolean ? "boolean" : "string",
+    };
+  }
+  return options;
+}
 
 /**
  * Shared action handler logic factory
  */
-const createHandler = (action: Action<any, any>) => async (argv: any) => {
-  try {
-    // Extract only the relevant inputs (exclude yargs metadata)
-    const { _, $0, ...rawInputs } = argv;
-
-    // Validate input schema if it exists
-    let validatedInput: unknown = rawInputs;
-    if (action.inputSchema) {
-      const result = await action.inputSchema["~standard"].validate(rawInputs);
-      if (result.issues) {
-        const msg =
-          `\n❌ Validation Error for '${action.name}':\n` +
-          result.issues
-            .map(
-              (issue: any) =>
-                `  - ${issue.path?.join(".") || "input"}: ${issue.message}`,
-            )
-            .join("\n");
-        if (!process.env.VITEST) {
-          console.error(msg);
-          process.exit(1);
-        }
-        throw new Error(msg);
-      }
-      validatedInput = result.value as unknown;
-    }
-
-    // Execute the action
-    const output = await (action.action as any)(validatedInput);
-
-    // Format and print output
-    if (output !== undefined) {
-      console.log(JSON.stringify(output, null, 2));
-    } else {
-      console.log("✅ Success");
-    }
-  } catch (error) {
-    console.error(`\n❌ Execution Failed:`, getErrorMessage(error));
-    process.exit(1);
-  } finally {
-    // Shared cleanup
+const createHandler =
+  (action: AnyAction) => async (argv: Record<string, unknown>) => {
     try {
-      await disconnect();
-    } catch {
-      // Ignore cleanup errors
+      // Extract only the relevant inputs (exclude yargs metadata)
+      const { _ = [], $0: _cmd = "", ...rawInputs } = argv;
+
+      // Validate input schema if it exists
+      let validatedInput: unknown = rawInputs;
+      if (action.inputSchema) {
+        const standardProps = action.inputSchema["~standard"];
+        const result = await standardProps.validate(rawInputs);
+        if (result.issues) {
+          const msg =
+            `\n❌ Validation Error for '${action.name}':\n` +
+            result.issues
+              .map((issue) => {
+                const pathStr = Array.isArray(issue.path)
+                  ? issue.path.join(".")
+                  : "";
+                return `  - ${pathStr !== "" ? pathStr : "input"}: ${issue.message}`;
+              })
+              .join("\n");
+          if (!process.env.VITEST) {
+            console.error(msg);
+            process.exit(1);
+          }
+          throw new Error(msg);
+        }
+        validatedInput = result.value;
+      }
+
+      // Execute the action
+      const actionFn = action.action as (input?: unknown) => Promise<unknown>;
+      const output = await actionFn(validatedInput);
+
+      // Format and print output
+      if (output !== undefined) {
+        console.log(JSON.stringify(output, null, 2));
+      } else {
+        console.log("✅ Success");
+      }
+    } catch (error: unknown) {
+      console.error(`\n❌ Execution Failed:`, getErrorMessage(error));
+      process.exit(1);
+    } finally {
+      // Shared cleanup
+      try {
+        await disconnect();
+      } catch {
+        // Ignore cleanup errors
+      }
     }
-  }
-};
+  };
 
 /**
  * Create and configure the Yargs parser
@@ -69,13 +122,14 @@ export function createParser() {
     .strict() // Fail on unknown commands
     .help()
     .alias("h", "help")
-    .version(pkg.version)
+    .version(pkg.version ?? "0.1.0")
     .alias("v", "version")
     .exitProcess(false) // Do not exit process directly on parse; better for tests
     .fail((msg, err) => {
       // Custom failure handler to avoid unintended process exits in tests
-      if (err) throw err;
-      const error = new Error(msg || "Command failed");
+      const failureErr = err as unknown as Error | undefined;
+      if (failureErr) throw failureErr;
+      const error = new Error(msg);
       if (!process.env.VITEST) {
         console.error(msg);
         process.exit(1);
@@ -84,13 +138,13 @@ export function createParser() {
     });
 
   // Organize actions into standalone and grouped (by prefix)
-  const standaloneActions: Action<any, any>[] = [];
-  const groupedActions: Record<string, Action<any, any>[]> = {};
+  const standaloneActions: AnyAction[] = [];
+  const groupedActions: Record<string, AnyAction[]> = {};
 
-  for (const action of Object.values(actionRegistry)) {
+  for (const action of Object.values(actionRegistry) as AnyAction[]) {
     const parts = action.name.split("_");
-    if (parts.length > 1) {
-      const group = parts[0]!;
+    const group = parts[0];
+    if (parts.length > 1 && group) {
       groupedActions[group] ??= [];
       groupedActions[group].push(action);
     } else {
@@ -104,19 +158,12 @@ export function createParser() {
       action.name,
       action.shortDescription,
       (y) => {
-        if (action.inputSchema && "~standard" in action.inputSchema) {
-          const schema = action.inputSchema["~standard"].types
-            ? action.inputSchema["~standard"].types.input
-            : action.inputSchema.shape;
-
-          if (schema) {
-            for (const [key, value] of Object.entries(schema)) {
-              y.option(key, {
-                describe: (value as any).description || "",
-                type: "string", // Default to string, logic can be refined for booleans/numbers
-              });
-            }
-          }
+        const options = getOptionsFromSchema(action.inputSchema);
+        for (const [key, opt] of Object.entries(options)) {
+          y.option(key, {
+            describe: opt.describe,
+            type: opt.type,
+          });
         }
         return y;
       },
@@ -137,20 +184,12 @@ export function createParser() {
             subCommandName,
             action.shortDescription,
             (sub) => {
-              if (action.inputSchema && "~standard" in action.inputSchema) {
-                // Accessing the internal Zod shape via standard-schema spec
-                const shape = action.inputSchema.shape;
-                if (shape) {
-                  for (const [key, value] of Object.entries(shape)) {
-                    sub.option(key, {
-                      describe: (value as any).description || "",
-                      type:
-                        (value as any)._def?.typeName === "ZodBoolean"
-                          ? "boolean"
-                          : "string",
-                    });
-                  }
-                }
+              const options = getOptionsFromSchema(action.inputSchema);
+              for (const [key, opt] of Object.entries(options)) {
+                sub.option(key, {
+                  describe: opt.describe,
+                  type: opt.type,
+                });
               }
               return sub;
             },

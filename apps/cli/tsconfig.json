@@ -4,6 +4,6 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src"],
+  "include": ["src", "build.js"],
   "exclude": ["node_modules", "dist"]
 }

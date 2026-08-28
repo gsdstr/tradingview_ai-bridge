@@ -15,7 +15,7 @@ describe("TradingView E2E — Chart Control", () => {
 
   it("chart_get_state — retrieves symbol and timeframe", async () => {
     if (!client) return;
-    const result = await chartGetState.action(undefined as any);
+    const result = await chartGetState.action();
     expect(result.success).toBe(true);
     expect(result.symbol).toBeDefined();
     expect(result.resolution).toBeDefined();

@@ -69,6 +69,8 @@ import {
   streamFetchValues,
 } from "./stream.js";
 
+export * from "./tv.js";
+export * from "./info.js";
 export * from "./watchlist.js";
 export * from "./alerts.js";
 export * from "./batch.js";

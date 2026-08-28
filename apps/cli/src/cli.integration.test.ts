@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { execa } from "execa";
 import { join } from "path";
 import { fileURLToPath } from "url";
+import { execa } from "execa";
+import { describe, expect, it } from "vitest";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const CLI_PATH = join(__dirname, "..", "src", "index.ts");
@@ -27,9 +27,15 @@ describe("CLI Integration", () => {
       await execa("bun", ["tsx", CLI_PATH, "unknown-cmd"]);
       // Should not reach here
       expect(true).toBe(false);
-    } catch (error: any) {
-      expect(error.exitCode).not.toBe(0);
-      const combinedOutput = (error.stdout || "") + (error.stderr || "");
+    } catch (error: unknown) {
+      const execaError = error as {
+        exitCode?: number;
+        stdout?: string;
+        stderr?: string;
+      };
+      expect(execaError.exitCode).not.toBe(0);
+      const combinedOutput =
+        (execaError.stdout ?? "") + (execaError.stderr ?? "");
       // Yargs might say "Unknown argument" or "Please provide a valid command"
       expect(combinedOutput.length).toBeGreaterThan(0);
     }
@@ -38,7 +44,7 @@ describe("CLI Integration", () => {
   it("executes standalone command (info)", async () => {
     const { stdout, exitCode } = await execa("bun", ["tsx", CLI_PATH, "info"]);
     expect(exitCode).toBe(0);
-    const output = JSON.parse(stdout);
+    const output = JSON.parse(stdout) as { application?: string };
     expect(output.application).toBeDefined();
   });
 });

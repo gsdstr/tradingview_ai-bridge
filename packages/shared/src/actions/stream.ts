@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Action } from "./action.js";
 import { fetchQuote, fetchLastBar, fetchIndicatorValues } from "../core/stream.js";
 

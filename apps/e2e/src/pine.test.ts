@@ -16,7 +16,7 @@ describe("TradingView E2E — Pine Script", () => {
   it("pine_get_source — reads editor content", async () => {
     if (!client) return;
     try {
-      const result = await pineGetSource.action(undefined as any);
+      const result = await pineGetSource.action();
       expect(result.success).toBe(true);
       expect(typeof result.source).toBe("string");
     } catch (e: any) {

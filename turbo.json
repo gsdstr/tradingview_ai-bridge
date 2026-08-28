@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["TV_DEBUG", "TV_CDP_PORT", "TV_CDP_HOST"],
+  "globalEnv": ["TV_DEBUG", "TV_CDP_PORT", "TV_CDP_HOST", "VITEST", "NODE_ENV"],
   "tasks": {
     "build": {
       "dependsOn": [

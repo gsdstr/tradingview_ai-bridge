@@ -15,8 +15,8 @@ describe("TradingView E2E — Health & Connection", () => {
 
   it("tv_health_check — reports connection status", async () => {
     if (!client) return; // Skip if not connected
-    const result = await tvHealthCheck.action(undefined as any);
+    const result = await tvHealthCheck.action();
     expect(result.success).toBe(true);
-    expect(result.app).toBe("TradingView");
+    expect(result.cdp_connected).toBe(true);
   });
 });

@@ -4,6 +4,7 @@ import eslint from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
 import turboPlugin from "eslint-plugin-turbo";
 import { defineConfig } from "eslint/config";
+import globals from "globals";
 import tseslint from "typescript-eslint";
 
 /**
@@ -79,9 +80,14 @@ export const baseConfig = defineConfig(
   {
     linterOptions: { reportUnusedDisableDirectives: true },
     languageOptions: {
+      globals: {
+        ...globals.node,
+      },
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+        projectService: {
+          allowDefaultProject: ["*.js", "*.mjs", "build.js"],
+        },
+        tsconfigRootDir: process.cwd(),
       },
     },
   },

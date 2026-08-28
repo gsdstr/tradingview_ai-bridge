@@ -17,11 +17,11 @@ describe("TradingView E2E — Drawings", () => {
     if (!client) return;
 
     // 1. Get current state for coordinates
-    const state = await chartGetState.action(undefined as any);
+    const state = await chartGetState.action();
     expect(state.success).toBe(true);
 
     const now = Math.floor(Date.now() / 1000);
-    const price = state.price || 150.0; // fallback if price not in state
+    const price = 150.0; // fallback price coordinate
 
     // 2. Draw a shape (Horizontal Line)
     const drawResult = await drawingDrawShape.action({
@@ -35,7 +35,7 @@ describe("TradingView E2E — Drawings", () => {
     const shapeId = drawResult.entity_id;
 
     // 3. Verify it appears in the list
-    const listResult = await drawingList.action({});
+    const listResult = await drawingList.action();
     expect(listResult.success).toBe(true);
     expect(listResult.shapes.some((s: any) => s.id === shapeId)).toBe(true);
 
@@ -45,7 +45,7 @@ describe("TradingView E2E — Drawings", () => {
     expect(removeResult.removed).toBe(true);
 
     // 5. Verify it is gone
-    const finalResult = await drawingList.action({});
+    const finalResult = await drawingList.action();
     expect(finalResult.shapes.some((s: any) => s.id === shapeId)).toBe(false);
   });
 });
