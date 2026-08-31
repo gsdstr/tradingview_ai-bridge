@@ -16,7 +16,7 @@
 **Status:** active
 
 ## 2026-08-31: Public MCP and CLI naming agreement
-**Decision:** Adopt the public naming agreement documented in [`tv_ai-bridge/docs/naming-agreement.md`](../../../docs/naming-agreement.md).
+**Decision:** Adopt the public naming agreement documented in [`tv-bridge/docs/naming-agreement.md`](../../../docs/naming-agreement.md).
 **Rationale:** One canonical grammar keeps MCP tool names and generated CLI commands consistent.
 **Alternatives considered:** Snake_case everywhere; external kebab-case without a domain separator.
 **Status:** active

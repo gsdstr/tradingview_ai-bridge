@@ -2,7 +2,7 @@
 
 ## Scope
 
-This agreement defines public names for `tv_ai-bridge` MCP tools and CLI
+This agreement defines public names for `tv-bridge` MCP tools and CLI
 commands. It does not prescribe TypeScript identifiers.
 
 ## Canonical grammar

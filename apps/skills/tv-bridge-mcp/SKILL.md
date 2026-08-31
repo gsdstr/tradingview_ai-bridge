@@ -1,21 +1,28 @@
+---
+name: tv-bridge-mcp
+description: Configure and interact with TradingView AI Bridge via Model Context Protocol (MCP) server over CDP. Provides health checks, watchlist management, and bridge details.
+metadata:
+  version: 0.1.0
+  category: tradingview
+  tags: [tradingview, cdp, mcp, bridge, automation]
+---
+
 # Skill: TradingView Bridge MCP
 
 Instructions for AI agents to configure and interact with the TradingView AI Bridge via the Model Context Protocol (MCP).
 
-## Tool Location
-
-The MCP server is located at: `scripts/tv-bridge-mcp.js`.
-
 ## Configuration
 
-To use this skill, add the following entry to your MCP configuration file (e.g., `claude_desktop_config.json`):
+`npx skills` installs this skill but does not define a portable MCP path variable. Resolve the installed directory first (for a project installation, run `pwd` from `.agents/skills/tv-bridge-mcp`) and replace `<ABSOLUTE_SKILL_PATH>` below with that absolute directory. Do not use a relative path: MCP hosts resolve it from their own working directory.
+
+Add the resulting entry to your MCP configuration file (for example, `claude_desktop_config.json` or `.mcp.json`):
 
 ```json
 {
   "mcpServers": {
     "tradingview": {
       "command": "node",
-      "args": ["/path/to/apps/skills/tv-bridge-mcp/scripts/tv-bridge-mcp.js"]
+      "args": ["<ABSOLUTE_SKILL_PATH>/scripts/tv-bridge-mcp.js"]
     }
   }
 }

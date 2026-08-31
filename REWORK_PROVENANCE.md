@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`tv_ai-bridge` is a local rework of TradingView MCP. It is **not** a checkout,
+`tv-bridge` is a local rework of TradingView MCP. It is **not** a checkout,
 fork branch, or automatic downstream of the upstream repository.
 
 The current product lives in this directory. The nested `./tradingview-mcp/`
@@ -24,7 +24,7 @@ silently compare against another revision.
 ## What is current implementation
 
 Treat files under this directory, excluding `./tradingview-mcp/`, as current
-`tv_ai-bridge` implementation:
+`tv-bridge` implementation:
 
 - `packages/shared/` — bridge logic and action definitions
 - `apps/cli/` — generated CLI adapter
@@ -164,10 +164,10 @@ the single required underscore: `watchlist_add`, `bridge_launch`.
 
 | Task | Correct comparison |
 | --- | --- |
-| Audit this rework | baseline commit above → current `tv_ai-bridge` source |
+| Audit this rework | baseline commit above → current `tv-bridge` source |
 | Prepare an upstream update | new upstream revision → baseline, then selectively port into current bridge |
 | Debug current bridge | current bridge source only; reference is context, not runtime code |
 
-`tv_ai-bridge` is intentionally structurally different from the baseline.
+`tv-bridge` is intentionally structurally different from the baseline.
 Large path-level diffs are expected and do not by themselves indicate a
 regression.

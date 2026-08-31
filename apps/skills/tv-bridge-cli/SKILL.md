@@ -17,7 +17,7 @@ Comprehensive guide for AI agents to operate the TradingView AI Bridge using the
 
 The standalone, bundled CLI script is located at:
 ```
-apps/skills/tv-bridge-cli/scripts/tv-bridge-cli.mjs
+scripts/tv-bridge-cli.mjs
 ```
 
 ### Execution Runtimes
@@ -26,13 +26,10 @@ Execute using Node.js (>=22) or Bun:
 
 ```bash
 # Using Node.js
-node apps/skills/tv-bridge-cli/scripts/tv-bridge-cli.mjs <command> [subcommand] [flags]
+node scripts/tv-bridge-cli.mjs <command> [subcommand] [flags]
 
 # Using Bun
-bun apps/skills/tv-bridge-cli/scripts/tv-bridge-cli.mjs <command> [subcommand] [flags]
-
-# If operating from within the apps/skills/tv-bridge-cli directory:
-node scripts/tv-bridge-cli.mjs <command> [subcommand] [flags]
+bun scripts/tv-bridge-cli.mjs <command> [subcommand] [flags]
 ```
 
 ---

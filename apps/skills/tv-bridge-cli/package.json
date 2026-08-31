@@ -5,6 +5,7 @@
   "private": true,
   "description": "Agent Skill for TradingView AI Bridge CLI",
   "scripts": {
-    "build": "bun --filter cli bundle && mkdir -p scripts && cp ../../cli/dist/tv-bridge-cli.mjs ./scripts/"
+    "build": "bun --filter cli bundle && mkdir -p scripts && cp ../../cli/dist/tv-bridge-cli.mjs ./scripts/ && node ../validate-skills.mjs",
+    "validate": "node ../validate-skills.mjs"
   }
 }
