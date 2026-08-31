@@ -1,5 +1,9 @@
 import type { Action } from "./action.js";
 export type { Action };
+export interface CliActionMetadata {
+  domain: string;
+  command: string;
+}
 import { tvLaunch, tvHealthCheck } from "./tv.js";
 import { infoDetails } from "./info.js";
 import { watchlistGet, watchlistAdd } from "./watchlist.js";
@@ -169,4 +173,69 @@ export const actionRegistry: Record<string, Action<any, any>> = {
   [streamFetchQuote.name]: streamFetchQuote,
   [streamFetchBar.name]: streamFetchBar,
   [streamFetchValues.name]: streamFetchValues,
+};
+
+// CLI paths are deliberate public metadata, not inferred from MCP tool names.
+export const actionCliMetadata: Record<string, CliActionMetadata> = {
+  [tvLaunch.name]: { domain: "bridge", command: "launch" },
+  [tvHealthCheck.name]: { domain: "bridge", command: "health-check" },
+  [infoDetails.name]: { domain: "bridge", command: "get-info" },
+  [watchlistGet.name]: { domain: "watchlist", command: "get" },
+  [watchlistAdd.name]: { domain: "watchlist", command: "add" },
+  [alertCreate.name]: { domain: "alert", command: "create" },
+  [alertList.name]: { domain: "alert", command: "list" },
+  [alertDelete.name]: { domain: "alert", command: "delete" },
+  [batchRunAction.name]: { domain: "batch", command: "run" },
+  [captureScreenshotAction.name]: { domain: "capture", command: "screenshot" },
+  [chartGetState.name]: { domain: "chart", command: "get-state" },
+  [chartSetSymbol.name]: { domain: "chart", command: "set-symbol" },
+  [chartSetTimeframe.name]: { domain: "chart", command: "set-timeframe" },
+  [chartSetType.name]: { domain: "chart", command: "set-type" },
+  [chartManageIndicator.name]: { domain: "chart", command: "manage-indicator" },
+  [chartGetVisibleRange.name]: { domain: "chart", command: "get-visible-range" },
+  [chartSetVisibleRange.name]: { domain: "chart", command: "set-visible-range" },
+  [chartScrollToDate.name]: { domain: "chart", command: "scroll-to-date" },
+  [chartSymbolInfo.name]: { domain: "chart", command: "get-symbol-info" },
+  [chartSymbolSearch.name]: { domain: "chart", command: "search-symbol" },
+  [dataGetOhlcv.name]: { domain: "data", command: "get-ohlcv" },
+  [dataGetIndicator.name]: { domain: "data", command: "get-indicator" },
+  [dataGetStrategyResults.name]: { domain: "data", command: "get-strategy-results" },
+  [dataGetStrategyPerformance.name]: { domain: "data", command: "get-strategy-performance" },
+  [dataGetTrades.name]: { domain: "data", command: "get-trades" },
+  [dataGetQuote.name]: { domain: "data", command: "get-quote" },
+  [dataGetDepth.name]: { domain: "data", command: "get-depth" },
+  [dataGetStudyValues.name]: { domain: "data", command: "get-study-values" },
+  [dataGetPineLines.name]: { domain: "data", command: "get-pine-lines" },
+  [dataGetPineLabels.name]: { domain: "data", command: "get-pine-labels" },
+  [dataGetPineTables.name]: { domain: "data", command: "get-pine-tables" },
+  [drawingDrawShape.name]: { domain: "drawing", command: "draw-shape" },
+  [drawingList.name]: { domain: "drawing", command: "list" },
+  [drawingGetProperties.name]: { domain: "drawing", command: "get-properties" },
+  [drawingRemove.name]: { domain: "drawing", command: "remove" },
+  [drawingClearAll.name]: { domain: "drawing", command: "clear-all" },
+  [indicatorSetInputs.name]: { domain: "indicator", command: "set-inputs" },
+  [indicatorGetInputs.name]: { domain: "indicator", command: "get-inputs" },
+  [indicatorGetInputsInfo.name]: { domain: "indicator", command: "get-inputs-info" },
+  [indicatorToggleVisibility.name]: { domain: "indicator", command: "toggle-visibility" },
+  [indicatorList.name]: { domain: "indicator", command: "list" },
+  [paneList.name]: { domain: "pane", command: "list" },
+  [paneSetLayout.name]: { domain: "pane", command: "set-layout" },
+  [paneFocus.name]: { domain: "pane", command: "focus" },
+  [paneSetSymbol.name]: { domain: "pane", command: "set-symbol" },
+  [pineGetSource.name]: { domain: "pine", command: "get-source" },
+  [pineSetSource.name]: { domain: "pine", command: "set-source" },
+  [pineCompile.name]: { domain: "pine", command: "compile" },
+  [pineGetErrors.name]: { domain: "pine", command: "get-errors" },
+  [pineSave.name]: { domain: "pine", command: "save" },
+  [pineCheck.name]: { domain: "pine", command: "check" },
+  [pineAnalyze.name]: { domain: "pine", command: "analyze" },
+  [replayStart.name]: { domain: "replay", command: "start" },
+  [replayStep.name]: { domain: "replay", command: "step" },
+  [replayAutoplay.name]: { domain: "replay", command: "autoplay" },
+  [replayStop.name]: { domain: "replay", command: "stop" },
+  [replayTrade.name]: { domain: "replay", command: "trade" },
+  [replayStatus.name]: { domain: "replay", command: "status" },
+  [streamFetchQuote.name]: { domain: "stream", command: "fetch-quote" },
+  [streamFetchBar.name]: { domain: "stream", command: "fetch-bar" },
+  [streamFetchValues.name]: { domain: "stream", command: "fetch-values" },
 };

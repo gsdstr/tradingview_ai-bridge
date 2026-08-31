@@ -46,7 +46,7 @@ export const chartSetSymbol: Action<
   typeof symbolInputSchema,
   typeof symbolOutputSchema
 > = {
-  name: "chart_set_symbol",
+  name: "chart_set-symbol",
   shortDescription: "Set chart symbol",
   description: "Changes the symbol on the active chart.",
   inputSchema: symbolInputSchema,
@@ -70,7 +70,7 @@ export const chartSetTimeframe: Action<
   typeof timeframeInputSchema,
   typeof timeframeOutputSchema
 > = {
-  name: "chart_set_timeframe",
+  name: "chart_set-timeframe",
   shortDescription: "Set chart timeframe",
   description: "Changes the timeframe (resolution) on the active chart.",
   inputSchema: timeframeInputSchema,
@@ -87,7 +87,7 @@ const typeInputSchema = z.object({
 });
 
 export const chartSetType: Action<typeof typeInputSchema, z.ZodAny> = {
-  name: "chart_set_type",
+  name: "chart_set-type",
   shortDescription: "Set chart type",
   description: "Changes the chart type (e.g. Candles, Bars, Line).",
   inputSchema: typeInputSchema,
@@ -107,7 +107,7 @@ export const chartManageIndicator: Action<
   typeof indicatorInputSchema,
   z.ZodAny
 > = {
-  name: "chart_manage_indicator",
+  name: "chart_manage-indicator",
   shortDescription: "Add or remove indicator",
   description:
     "Adds a new indicator or removes an existing one from the chart.",
@@ -118,7 +118,7 @@ export const chartManageIndicator: Action<
 };
 
 export const chartGetVisibleRange: Action<undefined, z.ZodAny> = {
-  name: "chart_get_visible_range",
+  name: "chart_get-visible-range",
   shortDescription: "Get visible bars range",
   description:
     "Retrieves the time range and bar indices currently visible on the chart.",
@@ -133,7 +133,7 @@ const rangeInputSchema = z.object({
 });
 
 export const chartSetVisibleRange: Action<typeof rangeInputSchema, z.ZodAny> = {
-  name: "chart_set_visible_range",
+  name: "chart_set-visible-range",
   shortDescription: "Set visible range",
   description: "Zooms/scrolls the chart to the specified unix timestamp range.",
   inputSchema: rangeInputSchema,
@@ -149,7 +149,7 @@ const scrollInputSchema = z.object({
 });
 
 export const chartScrollToDate: Action<typeof scrollInputSchema, z.ZodAny> = {
-  name: "chart_scroll_to_date",
+  name: "chart_scroll-to-date",
   shortDescription: "Scroll to date",
   description: "Centers the chart view on a specific date or timestamp.",
   inputSchema: scrollInputSchema,
@@ -159,7 +159,7 @@ export const chartScrollToDate: Action<typeof scrollInputSchema, z.ZodAny> = {
 };
 
 export const chartSymbolInfo: Action<undefined, z.ZodAny> = {
-  name: "chart_symbol_info",
+  name: "chart_get-symbol-info",
   shortDescription: "Get symbol info",
   description: "Retrieves detailed information about the current chart symbol.",
   action: async () => {
@@ -173,7 +173,7 @@ const searchInputSchema = z.object({
 });
 
 export const chartSymbolSearch: Action<typeof searchInputSchema, z.ZodAny> = {
-  name: "chart_symbol_search",
+  name: "chart_search-symbol",
   shortDescription: "Search for symbols",
   description: "Searches for symbols using TradingView's public search API.",
   inputSchema: searchInputSchema,

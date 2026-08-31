@@ -1,4 +1,9 @@
-import { evaluate, evaluateAsync, getClient, safeString } from "../connection.js";
+import {
+  evaluate,
+  evaluateAsync,
+  getClient,
+  safeString,
+} from "../connection.js";
 
 export interface CreateAlertOptions {
   condition?: string;
@@ -15,7 +20,9 @@ export interface CreateAlertResult {
   source: string;
 }
 
-export async function create(options: CreateAlertOptions): Promise<CreateAlertResult> {
+export async function create(
+  options: CreateAlertOptions,
+): Promise<CreateAlertResult> {
   const { condition, price, message } = options;
   const opened = await evaluate(`
     (function() {
@@ -28,8 +35,18 @@ export async function create(options: CreateAlertOptions): Promise<CreateAlertRe
 
   if (!opened) {
     const client = await getClient();
-    await client.Input.dispatchKeyEvent({ type: "keyDown", modifiers: 1, key: "a", code: "KeyA", windowsVirtualKeyCode: 65 });
-    await client.Input.dispatchKeyEvent({ type: "keyUp", key: "a", code: "KeyA" });
+    await client.Input.dispatchKeyEvent({
+      type: "keyDown",
+      modifiers: 1,
+      key: "a",
+      code: "KeyA",
+      windowsVirtualKeyCode: 65,
+    });
+    await client.Input.dispatchKeyEvent({
+      type: "keyUp",
+      key: "a",
+      code: "KeyA",
+    });
   }
 
   await new Promise((r) => setTimeout(r, 1000));
@@ -141,7 +158,7 @@ export async function list(): Promise<ListAlertsResult> {
       .catch(function(e) { return { alerts: [], error: e.message }; })
   `);
   return {
-    success: true,
+    success: !result?.error,
     alert_count: result?.alerts?.length || 0,
     source: "internal_api",
     alerts: result?.alerts || [],
@@ -160,7 +177,9 @@ export interface DeleteAlertsResult {
   source: string;
 }
 
-export async function deleteAlerts(options: DeleteAlertsOptions): Promise<DeleteAlertsResult> {
+export async function deleteAlerts(
+  options: DeleteAlertsOptions,
+): Promise<DeleteAlertsResult> {
   if (options.delete_all) {
     const result = await evaluate<{ context_menu_opened: boolean }>(`
       (function() {
@@ -181,5 +200,7 @@ export async function deleteAlerts(options: DeleteAlertsOptions): Promise<Delete
       source: "dom_fallback",
     };
   }
-  throw new Error("Individual alert deletion not yet supported. Use delete_all: true.");
+  throw new Error(
+    "Individual alert deletion not yet supported. Use delete_all: true.",
+  );
 }

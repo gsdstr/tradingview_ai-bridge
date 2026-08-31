@@ -8,7 +8,7 @@ const outputSchema = z.object({
 });
 
 export const infoDetails: Action<undefined, typeof outputSchema> = {
-  name: "info",
+  name: "bridge_get-info",
   shortDescription: "Show app information",
   description: "Retrieves basic application and status information.",
   outputSchema,

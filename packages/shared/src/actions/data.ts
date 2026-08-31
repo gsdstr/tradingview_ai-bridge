@@ -23,7 +23,7 @@ const ohlcvInputSchema = z.object({
 });
 
 export const dataGetOhlcv: Action<typeof ohlcvInputSchema, z.ZodAny> = {
-  name: "data_get_ohlcv",
+  name: "data_get-ohlcv",
   shortDescription: "Get OHLCV bar data",
   description: "Retrieves historical OHLCV bar data from the active chart.",
   inputSchema: ohlcvInputSchema,
@@ -40,7 +40,7 @@ export const dataGetIndicator: Action<
   typeof indicatorDataInputSchema,
   z.ZodAny
 > = {
-  name: "data_get_indicator",
+  name: "data_get-indicator",
   shortDescription: "Get indicator data",
   description:
     "Retrieves inputs and visibility state for a specific indicator.",
@@ -51,7 +51,7 @@ export const dataGetIndicator: Action<
 };
 
 export const dataGetStrategyResults: Action<undefined, z.ZodAny> = {
-  name: "data_get_strategy_results",
+  name: "data_get-strategy-results",
   shortDescription: "Get strategy metrics",
   description:
     "Retrieves performance metrics from the strategy tester (Profit, Drawdown, etc.).",
@@ -75,7 +75,7 @@ const tradesInputSchema = z.object({
 });
 
 export const dataGetTrades: Action<typeof tradesInputSchema, z.ZodAny> = {
-  name: "data_get_trades",
+  name: "data_get-trades",
   shortDescription: "Get strategy trades",
   description: "Retrieves the list of recent trades from the strategy tester.",
   inputSchema: tradesInputSchema,
@@ -92,7 +92,7 @@ const quoteInputSchema = z.object({
 });
 
 export const dataGetQuote: Action<typeof quoteInputSchema, z.ZodAny> = {
-  name: "data_get_quote",
+  name: "data_get-quote",
   shortDescription: "Get real-time quote",
   description: "Retrieves the latest price, bid, ask, and volume for a symbol.",
   inputSchema: quoteInputSchema,
@@ -102,7 +102,7 @@ export const dataGetQuote: Action<typeof quoteInputSchema, z.ZodAny> = {
 };
 
 export const dataGetDepth: Action<undefined, z.ZodAny> = {
-  name: "data_get_depth",
+  name: "data_get-depth",
   shortDescription: "Get market depth (DOM)",
   description:
     "Retrieves the Order Book / Depth of Market data if the panel is open.",
@@ -112,7 +112,7 @@ export const dataGetDepth: Action<undefined, z.ZodAny> = {
 };
 
 export const dataGetStudyValues: Action<undefined, z.ZodAny> = {
-  name: "data_get_study_values",
+  name: "data_get-study-values",
   shortDescription: "Get latest study values",
   description:
     "Retrieves the most recent values for all visible indicators on the chart.",
@@ -130,7 +130,7 @@ export const dataGetPineLines: Action<
   typeof pineGraphicsInputSchema,
   z.ZodAny
 > = {
-  name: "data_get_pine_lines",
+  name: "data_get-pine-lines",
   shortDescription: "Get Pine Script lines",
   description:
     "Retrieves line drawings created by Pine Scripts (e.g. SR levels).",
@@ -146,7 +146,7 @@ const pineLabelsInputSchema = pineGraphicsInputSchema.extend({
 
 export const dataGetPineLabels: Action<typeof pineLabelsInputSchema, z.ZodAny> =
   {
-    name: "data_get_pine_labels",
+    name: "data_get-pine-labels",
     shortDescription: "Get Pine Script labels",
     description: "Retrieves label drawings create by Pine Scripts.",
     inputSchema: pineLabelsInputSchema,
@@ -159,7 +159,7 @@ export const dataGetPineTables: Action<
   z.ZodObject<{ study_filter: z.ZodOptional<z.ZodString> }>,
   z.ZodAny
 > = {
-  name: "data_get_pine_tables",
+  name: "data_get-pine-tables",
   shortDescription: "Get Pine Script tables",
   description: "Retrieves table data created by Pine Scripts.",
   inputSchema: z.object({ study_filter: z.string().optional() }),

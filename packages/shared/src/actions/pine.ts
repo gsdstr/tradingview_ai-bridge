@@ -10,7 +10,7 @@ const sourceOutputSchema = z.object({
 });
 
 export const pineGetSource: Action<undefined, typeof sourceOutputSchema> = {
-  name: "pine_get_source",
+  name: "pine_get-source",
   shortDescription: "Get Pine Editor source",
   description: "Retrieves the current script source code from the Pine Editor.",
   outputSchema: sourceOutputSchema,
@@ -24,7 +24,7 @@ const setSourceInputSchema = z.object({
 });
 
 export const pineSetSource: Action<typeof setSourceInputSchema, z.ZodAny> = {
-  name: "pine_set_source",
+  name: "pine_set-source",
   shortDescription: "Set Pine Editor source",
   description: "Updates the source code in the Pine Editor.",
   inputSchema: setSourceInputSchema,
@@ -43,7 +43,7 @@ export const pineCompile: Action<undefined, z.ZodAny> = {
 };
 
 export const pineGetErrors: Action<undefined, z.ZodAny> = {
-  name: "pine_get_errors",
+  name: "pine_get-errors",
   shortDescription: "Get editor errors",
   description: "Retrieves lint/compile errors directly from the Monaco editor markers.",
   action: async () => {

@@ -1,11 +1,19 @@
-import { evaluate, evaluateAsync, getClient, safeString } from "../connection.js";
+import {
+  evaluate,
+  evaluateAsync,
+  getClient,
+  safeString,
+} from "../connection.js";
 import { getChartApi, getChartCollection } from "../known.js";
 import { writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SCREENSHOT_DIR = join(dirname(dirname(dirname(__dirname))), "screenshots");
+const SCREENSHOT_DIR = join(
+  dirname(dirname(dirname(__dirname))),
+  "screenshots",
+);
 
 // Note: waitForChartReady is usually in a separate file, but for now I'll implement a simple version or port it if I found it.
 // The previous reference to wait.ts failed, so I'll check if there's any other "wait" logic or just use a timeout as fallback.
@@ -39,7 +47,9 @@ export interface BatchRunResult {
   results: BatchIterationResult[];
 }
 
-export async function batchRun(options: BatchRunOptions): Promise<BatchRunResult> {
+export async function batchRun(
+  options: BatchRunOptions,
+): Promise<BatchRunResult> {
   const { symbols, timeframes, action, delay_ms, ohlcv_count } = options;
   const tfs = timeframes && timeframes.length > 0 ? timeframes : [null];
   const delay = delay_ms || 2000;
@@ -58,12 +68,16 @@ export async function batchRun(options: BatchRunOptions): Promise<BatchRunResult
     for (const tf of tfs) {
       const combo = { symbol, timeframe: tf };
       try {
-        if (colPath) await evaluate(`${colPath}.setSymbol(${safeString(symbol)})`);
-        else if (apiPath) await evaluate(`${apiPath}.setSymbol(${safeString(symbol)})`);
+        if (colPath)
+          await evaluate(`${colPath}.setSymbol(${safeString(symbol)})`);
+        else if (apiPath)
+          await evaluate(`${apiPath}.setSymbol(${safeString(symbol)})`);
 
         if (tf) {
-          if (colPath) await evaluate(`${colPath}.setResolution(${safeString(tf)})`);
-          else if (apiPath) await evaluate(`${apiPath}.setResolution(${safeString(tf)})`);
+          if (colPath)
+            await evaluate(`${colPath}.setResolution(${safeString(tf)})`);
+          else if (apiPath)
+            await evaluate(`${apiPath}.setResolution(${safeString(tf)})`);
         }
 
         await waitForChartReady(symbol);
@@ -73,9 +87,13 @@ export async function batchRun(options: BatchRunOptions): Promise<BatchRunResult
         if (action === "screenshot") {
           mkdirSync(SCREENSHOT_DIR, { recursive: true });
           const client = await getClient();
-          const { data } = await client.Page.captureScreenshot({ format: "png" });
+          const { data } = await client.Page.captureScreenshot({
+            format: "png",
+          });
           const ts = new Date().toISOString().replace(/[:.]/g, "-");
-          const fname = `batch_${symbol}_${tf || "default"}_${ts}`.replace(/[\/\\]/g, "_") + ".png";
+          const fname =
+            `batch_${symbol}_${tf || "default"}_${ts}`.replace(/[\/\\]/g, "_") +
+            ".png";
           const filePath = join(SCREENSHOT_DIR, fname);
           writeFileSync(filePath, Buffer.from(data, "base64"));
           actionResult = { file_path: filePath };
@@ -107,9 +125,19 @@ export async function batchRun(options: BatchRunOptions): Promise<BatchRunResult
             })()
           `);
         } else {
-          actionResult = { error: "Unknown action or API not available: " + action };
+          actionResult = {
+            error: "Unknown action or API not available: " + action,
+          };
         }
-        results.push({ ...combo, success: true, result: actionResult });
+        if (actionResult?.error) {
+          results.push({
+            ...combo,
+            success: false,
+            error: String(actionResult.error),
+          });
+        } else {
+          results.push({ ...combo, success: true, result: actionResult });
+        }
       } catch (err: any) {
         results.push({ ...combo, success: false, error: err.message });
       }
@@ -118,7 +146,7 @@ export async function batchRun(options: BatchRunOptions): Promise<BatchRunResult
 
   const successCount = results.filter((r) => r.success).length;
   return {
-    success: true,
+    success: results.every((result) => result.success),
     total_iterations: results.length,
     successful: successCount,
     failed: results.length - successCount,

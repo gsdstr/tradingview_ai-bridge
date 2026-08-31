@@ -165,22 +165,30 @@ async function evaluateRaw<T = any>(
   const timeoutMs = opts.timeout ?? 15000;
   const c = await getClient();
 
-  // Implement real timeout using Promise.race
-  const result = await Promise.race([
-    c.Runtime.evaluate({
-      expression,
-      returnByValue: true,
-      awaitPromise: opts.awaitPromise ?? false,
-      userGesture: opts.userGesture ?? true,
-      ...opts,
-    }),
-    new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error(`JS evaluation timeout after ${timeoutMs}ms`)),
-        timeoutMs,
-      ),
-    ),
-  ]);
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeout = setTimeout(
+      () => reject(new Error(`JS evaluation timeout after ${timeoutMs}ms`)),
+      timeoutMs,
+    );
+  });
+
+  // Implement real timeout using Promise.race and release its timer on settle.
+  let result: Awaited<ReturnType<typeof c.Runtime.evaluate>>;
+  try {
+    result = await Promise.race([
+      c.Runtime.evaluate({
+        expression,
+        returnByValue: true,
+        awaitPromise: opts.awaitPromise ?? false,
+        userGesture: opts.userGesture ?? true,
+        ...opts,
+      }),
+      timeoutPromise,
+    ]);
+  } finally {
+    if (timeout !== undefined) clearTimeout(timeout);
+  }
 
   if (result.exceptionDetails) {
     let msg =

@@ -69,7 +69,7 @@ export const indicatorToggleVisibility: Action<
   typeof visibilityInputSchema,
   z.ZodAny
 > = {
-  name: "indicator_toggle_visibility",
+  name: "indicator_toggle-visibility",
   shortDescription: "Show/hide indicator",
   description: "Toggles the visibility of a specific indicator on the chart.",
   inputSchema: visibilityInputSchema,

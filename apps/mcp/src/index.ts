@@ -1,5 +1,6 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
+import { McpServer, StdioServerTransport } from "@modelcontextprotocol/server";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import type { Action } from "@repo/shared";
 import { actionRegistry, getErrorMessage } from "@repo/shared";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
@@ -10,28 +11,38 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
  * This server dynamically registers all tools from the shared Action registry,
  * ensuring architectural consistency between the CLI and the MCP interface.
  */
-const server = new McpServer(
-  {
-    name: "tradingview-ai-desk",
-    version: "0.1.0",
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  },
-);
-
 type ToolInputSchema = NonNullable<
   Parameters<McpServer["registerTool"]>[1]["inputSchema"]
 >;
 
+type ToolHandler = (input: unknown) => Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  isError?: boolean;
+}>;
+
+type ActionRegistrar = (
+  name: string,
+  config: { description: string; inputSchema?: ToolInputSchema },
+  handler: ToolHandler,
+) => unknown;
+
+export const MCP_TOOL_NAME_PATTERN =
+  /^[a-z][a-z0-9]*_[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+
+export function getMcpToolNames() {
+  return Object.keys(actionRegistry).sort();
+}
+
 function registerAction<
   I extends StandardSchemaV1 | undefined,
   O extends StandardSchemaV1 | undefined,
->(action: Action<I, O>) {
+>(server: McpServer, action: Action<I, O>) {
+  const registerTool = server.registerTool.bind(
+    server,
+  ) as unknown as ActionRegistrar;
+
   if (action.inputSchema) {
-    server.registerTool(
+    registerTool(
       action.name,
       {
         description: action.description,
@@ -63,7 +74,7 @@ function registerAction<
       },
     );
   } else {
-    server.registerTool(
+    registerTool(
       action.name,
       {
         description: action.description,
@@ -96,18 +107,45 @@ function registerAction<
   }
 }
 
-// Dynamically register all shared actions as MCP tools
-for (const action of Object.values(actionRegistry)) {
-  registerAction(action);
+export function createServer() {
+  const server = new McpServer(
+    {
+      name: "tradingview-ai-desk",
+      version: "0.1.0",
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    },
+  );
+
+  for (const action of Object.values(actionRegistry)) {
+    if (!MCP_TOOL_NAME_PATTERN.test(action.name)) {
+      throw new Error(`Invalid canonical MCP tool name: ${action.name}`);
+    }
+    registerAction(server, action);
+  }
+
+  return server;
 }
 
-async function run() {
-  const transport = new StdioServerTransport();
+export async function startServer(
+  server = createServer(),
+  transport = new StdioServerTransport(),
+) {
   await server.connect(transport);
   console.error("TradingView AI Desk MCP Server running on stdio");
+  return server;
 }
 
-run().catch((error: unknown) => {
-  console.error("Fatal error running server:", error);
-  process.exit(1);
-});
+const isMainModule =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+
+if (isMainModule) {
+  startServer().catch((error: unknown) => {
+    console.error("Fatal error running server:", error);
+    process.exit(1);
+  });
+}

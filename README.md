@@ -12,16 +12,16 @@ Bridge to connect your AI assistant to your TradingView Desktop charts. Connects
 > **Requires a valid TradingView subscription.** This tool does not bypass or circumvent any TradingView paywall or access control. It reads from and controls the TradingView Desktop app already running on your machine.
 
 > [!NOTE]
-> **All data processing occurs locally on your machine.** No TradingView data is transmitted, stored, or redistributed externally by this tool.
+> **Most processing occurs locally on your machine.** The optional Pine compilation action sends submitted Pine source to TradingView's Pine compilation endpoint; the bridge does not separately store or redistribute that source.
 
 > [!CAUTION]
 > This tool accesses undocumented internal TradingView APIs via the Electron debug interface. These can change or break without notice in any TradingView update. Pin your TradingView Desktop version if stability matters to you.
 
 ## How It Works (and why it's safe to run)
 
-This tool does not connect to TradingView's servers, modify any TradingView files, or intercept any network traffic. It communicates exclusively with your locally running TradingView Desktop instance via Chrome DevTools Protocol (CDP) — a standard debugging interface built into all Chromium/Electron applications by Google, including VS Code, Slack, and Discord.
+This tool normally communicates with your locally running TradingView Desktop instance via Chrome DevTools Protocol (CDP) — a standard debugging interface built into Chromium/Electron applications such as VS Code, Slack, and Discord. It does not modify TradingView files or intercept network traffic. The optional Pine compilation action is an exception: it sends submitted Pine source to TradingView's `pine-facade` API for compilation.
 
-The debug port is disabled by default and must be explicitly enabled by you using a standard Chromium flag (`--remote-debugging-port=9222`). Nothing happens without that deliberate step.
+The debug port is disabled by default and must be explicitly enabled by you using a standard Chromium flag (`--remote-debugging-port=9223`). Nothing happens without that deliberate step.
 
 ## Structure
 
@@ -95,7 +95,7 @@ Unit tests for core logic are colocated with the source code in `packages/shared
 E2E tests interact with a real TradingView Desktop instance. They are isolated in a dedicated package to separate environment-dependent tests from pure logic.
 
 - **Location**: `apps/e2e/src/`
-- **Requirements**: TradingView Desktop running with `--remote-debugging-port=9222`.
+- **Requirements**: TradingView Desktop running with `--remote-debugging-port=9223`.
 - **Runner**: [Vitest](https://vitest.dev/)
 - **Command**: `bun --filter @repo/e2e test`
 

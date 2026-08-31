@@ -30,7 +30,7 @@ const launchOutputSchema = z.object({
 });
 
 export const tvLaunch: Action<typeof inputSchema, typeof launchOutputSchema> = {
-  name: "tv_launch",
+  name: "bridge_launch",
   shortDescription: "Launch TradingView with remote debugging",
   description:
     "Launches the TradingView Desktop application with the Chrome DevTools Protocol enabled on the specified port. Optionally kills existing instances first.",
@@ -58,7 +58,7 @@ const healthOutputSchema = z.object({
 });
 
 export const tvHealthCheck: Action<undefined, typeof healthOutputSchema> = {
-  name: "tv_health",
+  name: "bridge_health-check",
   shortDescription: "Check TradingView connection health",
   description:
     "Verifies the CDP connection to TradingView and ensures APIs are available.",

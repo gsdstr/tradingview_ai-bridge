@@ -9,17 +9,17 @@ const CLI_PATH = join(__dirname, "..", "src", "index.ts");
 describe("CLI Integration", () => {
   it("shows help output", async () => {
     const { stdout } = await execa("bun", ["tsx", CLI_PATH, "--help"]);
-    expect(stdout).toContain("tv-cli <cmd> [args]");
-    expect(stdout).toContain("tv");
+    expect(stdout).toContain("tv <cmd> [args]");
+    expect(stdout).toContain("bridge");
     expect(stdout).toContain("watchlist");
-    expect(stdout).toContain("info");
+    expect(stdout).toContain("capture");
   });
 
   it("shows help for subcommands", async () => {
-    const { stdout } = await execa("bun", ["tsx", CLI_PATH, "tv", "--help"]);
-    expect(stdout).toContain("tv-cli tv");
+    const { stdout } = await execa("bun", ["tsx", CLI_PATH, "bridge", "--help"]);
+    expect(stdout).toContain("tv bridge");
     expect(stdout).toContain("launch");
-    expect(stdout).toContain("health");
+    expect(stdout).toContain("health-check");
   });
 
   it("returns non-zero exit code for unknown command", async () => {
@@ -41,8 +41,8 @@ describe("CLI Integration", () => {
     }
   });
 
-  it("executes standalone command (info)", async () => {
-    const { stdout, exitCode } = await execa("bun", ["tsx", CLI_PATH, "info"]);
+  it("executes bridge get-info", async () => {
+    const { stdout, exitCode } = await execa("bun", ["tsx", CLI_PATH, "bridge", "get-info"]);
     expect(exitCode).toBe(0);
     const output = JSON.parse(stdout) as { application?: string };
     expect(output.application).toBeDefined();

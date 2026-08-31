@@ -48,7 +48,7 @@ export async function getStrategyPerformance() {
     return { performance: performance, source: primary.name };
   });
   return {
-    success: true,
+    success: !results?.error,
     source: results?.source,
     performance: results?.performance || {},
     error: results?.error,
@@ -244,7 +244,7 @@ export async function getStrategyResults(): Promise<any> {
     })()
   `);
   return {
-    success: true,
+    success: !results?.error,
     metric_count: Object.keys(results?.metrics || {}).length,
     source: results?.source,
     metrics: results?.metrics || {},
@@ -290,7 +290,7 @@ export async function getTrades(
     })()
   `);
   return {
-    success: true,
+    success: !trades?.error,
     trade_count: trades?.trades?.length || 0,
     source: trades?.source,
     trades: trades?.trades || [],

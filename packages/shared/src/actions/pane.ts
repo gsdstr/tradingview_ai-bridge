@@ -16,7 +16,7 @@ const layoutInputSchema = z.object({
 });
 
 export const paneSetLayout: Action<typeof layoutInputSchema, z.ZodAny> = {
-  name: "pane_set_layout",
+  name: "pane_set-layout",
   shortDescription: "Set chart layout",
   description: "Changes the multi-chart layout grid (e.g. 2x2, vertical split).",
   inputSchema: layoutInputSchema,
@@ -45,7 +45,7 @@ const symInputSchema = z.object({
 });
 
 export const paneSetSymbol: Action<typeof symInputSchema, z.ZodAny> = {
-  name: "pane_set_symbol",
+  name: "pane_set-symbol",
   shortDescription: "Set symbol on pane",
   description: "Changes the symbol for a specific pane in the layout.",
   inputSchema: symInputSchema,

@@ -1,6 +1,11 @@
 import { createRequire } from "module";
 import type { Action } from "@repo/shared";
-import { actionRegistry, disconnect, getErrorMessage } from "@repo/shared";
+import {
+  actionCliMetadata,
+  actionRegistry,
+  disconnect,
+  getErrorMessage,
+} from "@repo/shared";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import yargs from "yargs";
 
@@ -15,7 +20,9 @@ type AnyAction = Action<
 interface SchemaField {
   description?: string;
   _def?: {
+    type?: string;
     typeName?: string;
+    innerType?: SchemaField;
   };
 }
 
@@ -28,9 +35,38 @@ interface ShapeHolder {
   };
 }
 
+type OptionType = "string" | "boolean" | "number";
+
+function getOptionType(field: SchemaField): OptionType {
+  const type = field._def?.type ?? field._def?.typeName;
+
+  if (type === "boolean" || type === "ZodBoolean") {
+    return "boolean";
+  }
+  if (type === "number" || type === "ZodNumber") {
+    return "number";
+  }
+
+  if (
+    (type === "optional" ||
+      type === "default" ||
+      type === "nullable" ||
+      type === "catch" ||
+      type === "ZodOptional" ||
+      type === "ZodDefault" ||
+      type === "ZodNullable" ||
+      type === "ZodCatch") &&
+    field._def?.innerType
+  ) {
+    return getOptionType(field._def.innerType);
+  }
+
+  return "string";
+}
+
 function getOptionsFromSchema(
   inputSchema: unknown,
-): Record<string, { describe: string; type: "string" | "boolean" }> {
+): Record<string, { describe: string; type: OptionType }> {
   if (!inputSchema || typeof inputSchema !== "object") {
     return {};
   }
@@ -42,13 +78,12 @@ function getOptionsFromSchema(
 
   const options: Record<
     string,
-    { describe: string; type: "string" | "boolean" }
+    { describe: string; type: OptionType }
   > = {};
   for (const [key, value] of Object.entries(shape)) {
-    const isBoolean = value._def?.typeName === "ZodBoolean";
     options[key] = {
       describe: value.description ?? "",
-      type: isBoolean ? "boolean" : "string",
+      type: getOptionType(value),
     };
   }
   return options;
@@ -62,12 +97,18 @@ const createHandler =
     try {
       // Extract only the relevant inputs (exclude yargs metadata)
       const { _ = [], $0: _cmd = "", ...rawInputs } = argv;
+      const normalizedInputs = Object.fromEntries(
+        Object.entries(rawInputs).map(([key, value]) => [
+          key.replaceAll("-", "_"),
+          value,
+        ]),
+      );
 
       // Validate input schema if it exists
-      let validatedInput: unknown = rawInputs;
+      let validatedInput: unknown = normalizedInputs;
       if (action.inputSchema) {
         const standardProps = action.inputSchema["~standard"];
-        const result = await standardProps.validate(rawInputs);
+        const result = await standardProps.validate(normalizedInputs);
         if (result.issues) {
           const msg =
             `\n❌ Validation Error for '${action.name}':\n` +
@@ -79,10 +120,6 @@ const createHandler =
                 return `  - ${pathStr !== "" ? pathStr : "input"}: ${issue.message}`;
               })
               .join("\n");
-          if (!process.env.VITEST) {
-            console.error(msg);
-            process.exit(1);
-          }
           throw new Error(msg);
         }
         validatedInput = result.value;
@@ -100,7 +137,9 @@ const createHandler =
       }
     } catch (error: unknown) {
       console.error(`\n❌ Execution Failed:`, getErrorMessage(error));
-      process.exit(1);
+      if (!process.env.VITEST) {
+        process.exitCode = 1;
+      }
     } finally {
       // Shared cleanup
       try {
@@ -116,10 +155,11 @@ const createHandler =
  */
 export function createParser() {
   const parser = yargs()
-    .scriptName("tv-cli")
+    .scriptName("tv")
     .usage("$0 <cmd> [args]")
     .demandCommand(1, "Please provide a valid command.")
     .strict() // Fail on unknown commands
+    .parserConfiguration({ "camel-case-expansion": false })
     .help()
     .alias("h", "help")
     .version(pkg.version ?? "0.1.0")
@@ -132,61 +172,42 @@ export function createParser() {
       const error = new Error(msg);
       if (!process.env.VITEST) {
         console.error(msg);
-        process.exit(1);
+        process.exitCode = 1;
       }
       throw error;
     });
 
-  // Organize actions into standalone and grouped (by prefix)
-  const standaloneActions: AnyAction[] = [];
-  const groupedActions: Record<string, AnyAction[]> = {};
+  const groupedActions: Record<
+    string,
+    Array<{ action: AnyAction; command: string }>
+  > = {};
 
   for (const action of Object.values(actionRegistry) as AnyAction[]) {
-    const parts = action.name.split("_");
-    const group = parts[0];
-    if (parts.length > 1 && group) {
-      groupedActions[group] ??= [];
-      groupedActions[group].push(action);
-    } else {
-      standaloneActions.push(action);
+    const metadata = actionCliMetadata[action.name];
+    if (!metadata) {
+      throw new Error(`Missing CLI metadata for ${action.name}`);
     }
+    const actions = (groupedActions[metadata.domain] ??= []);
+    actions.push({
+      action,
+      command: metadata.command,
+    });
   }
 
-  // Register standalone commands (e.g., 'health', 'info')
-  for (const action of standaloneActions) {
-    parser.command(
-      action.name,
-      action.shortDescription,
-      (y) => {
-        const options = getOptionsFromSchema(action.inputSchema);
-        for (const [key, opt] of Object.entries(options)) {
-          y.option(key, {
-            describe: opt.describe,
-            type: opt.type,
-          });
-        }
-        return y;
-      },
-      createHandler(action),
-    );
-  }
-
-  // Register grouped commands as subcommands (e.g., 'watchlist get')
+  // Register public CLI paths from explicit metadata.
   for (const [groupName, actions] of Object.entries(groupedActions)) {
     parser.command(
       groupName,
       `${groupName.charAt(0).toUpperCase() + groupName.slice(1)} operations`,
       (yargsGroup) => {
-        for (const action of actions) {
-          // Use the part after the group name as the subcommand name
-          const subCommandName = action.name.slice(groupName.length + 1);
+        for (const { action, command } of actions) {
           yargsGroup.command(
-            subCommandName,
+            command,
             action.shortDescription,
             (sub) => {
               const options = getOptionsFromSchema(action.inputSchema);
               for (const [key, opt] of Object.entries(options)) {
-                sub.option(key, {
+                sub.option(key.replaceAll("_", "-"), {
                   describe: opt.describe,
                   type: opt.type,
                 });

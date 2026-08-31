@@ -25,7 +25,7 @@ To use this skill, add the following entry to your MCP configuration file (e.g.,
 
 Once connected, the following tools will be available:
 
-### `tv_health`
+### `bridge_health-check`
 - **Purpose**: Verify CDP connection status and chart metadata.
 - **Output**: JSON containing `cdp_connected`, `api_available`, and active chart info.
 
@@ -37,18 +37,18 @@ Once connected, the following tools will be available:
 - **Purpose**: Add a new symbol to the active watchlist.
 - **Input**: `{ "symbol": "NASDAQ:AAPL" }`
 
-### `info`
+### `bridge_get-info`
 - **Purpose**: Show bridge metadata.
 
 ## Usage Guidelines
 
-1. **Automation**: Always check `tv_health` before suggesting TradingView UI interactions.
-2. **Launch Requirement**: If `tv_health` shows `cdp_connected: false`, you may need to use the CLI skill (`tv launch`) first to open TradingView with the correct debugging flags.
+1. **Automation**: Always check `bridge_health-check` before suggesting TradingView UI interactions.
+2. **Launch Requirement**: If `bridge_health-check` shows `cdp_connected: false`, use the CLI skill (`tv bridge launch`) first to open TradingView with the correct debugging flags.
 3. **Validation**: The server uses strict Zod validation (StandardSchemaV1). Ensure inputs match the required schema.
 
 ## Example Workflow
 
-1.  **Agent Action**: Call `tv_health`.
+1.  **Agent Action**: Call `bridge_health-check`.
 2.  **Response**: "Status: Connected, Symbol: BTCUSD".
 3.  **Agent Action**: Prompt user - "I see you are on BTCUSD, would you like me to add it to your watchlist?".
 4.  **Agent Action**: Call `watchlist_add` with symbol.

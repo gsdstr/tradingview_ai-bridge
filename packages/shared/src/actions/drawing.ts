@@ -16,7 +16,7 @@ const drawInputSchema = z.object({
 });
 
 export const drawingDrawShape: Action<typeof drawInputSchema, z.ZodAny> = {
-  name: "drawing_draw_shape",
+  name: "drawing_draw-shape",
   shortDescription: "Draw a shape on chart",
   description: "Creates a drawing object (line, arrow, etc.) at specific time/price coordinates.",
   inputSchema: drawInputSchema,
@@ -39,7 +39,7 @@ const propertiesInputSchema = z.object({
 });
 
 export const drawingGetProperties: Action<typeof propertiesInputSchema, z.ZodAny> = {
-  name: "drawing_get_properties",
+  name: "drawing_get-properties",
   shortDescription: "Get drawing properties",
   description: "Retrieves coordinates and styling properties for a specific drawing.",
   inputSchema: propertiesInputSchema,
@@ -59,7 +59,7 @@ export const drawingRemove: Action<typeof propertiesInputSchema, z.ZodAny> = {
 };
 
 export const drawingClearAll: Action<undefined, z.ZodAny> = {
-  name: "drawing_clear_all",
+  name: "drawing_clear-all",
   shortDescription: "Clear all drawings",
   description: "Removes all drawing objects from the active chart.",
   action: async () => {
