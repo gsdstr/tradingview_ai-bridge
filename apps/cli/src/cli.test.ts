@@ -21,11 +21,21 @@ vi.mock("@repo/shared", () => {
         shortDescription: "info",
         action: vi.fn().mockResolvedValue({ application: "test" }),
       },
+      "strategy_update-report": {
+        name: "strategy_update-report",
+        shortDescription: "Update strategy report",
+        action: vi.fn().mockResolvedValue({
+          success: true,
+          updated: true,
+          message: "Update report button clicked successfully.",
+        }),
+      },
     },
     actionCliMetadata: {
       "bridge_health-check": { domain: "bridge", command: "health-check" },
       watchlist_get: { domain: "watchlist", command: "get" },
       "bridge_get-info": { domain: "bridge", command: "get-info" },
+      "strategy_update-report": { domain: "strategy", command: "update-report" },
     },
     getErrorMessage: (err: unknown) =>
       err instanceof Error ? err.message : String(err),
@@ -67,6 +77,7 @@ describe("CLI Routing and Validation", () => {
     const helpOutput = await parser.getHelp();
     expect(helpOutput).toContain("bridge");
     expect(helpOutput).toContain("watchlist");
+    expect(helpOutput).toContain("strategy");
     expect(helpOutput).toContain("test");
   });
 
@@ -75,6 +86,13 @@ describe("CLI Routing and Validation", () => {
 
     const { actionRegistry } = await import("@repo/shared");
     expect(actionRegistry["bridge_health-check"]?.action).toHaveBeenCalled();
+  });
+
+  it("routes 'strategy update-report' to strategy_update-report action", async () => {
+    await parser.parse(["strategy", "update-report"]);
+
+    const { actionRegistry } = await import("@repo/shared");
+    expect(actionRegistry["strategy_update-report"]?.action).toHaveBeenCalled();
   });
 
   it("routes 'watchlist get' to watchlist_get action", async () => {

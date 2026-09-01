@@ -57,6 +57,7 @@ The CLI dynamically discovers commands from explicit public metadata using `yarg
    node scripts/tv-bridge-cli.mjs pane --help
    node scripts/tv-bridge-cli.mjs pine --help
    node scripts/tv-bridge-cli.mjs replay --help
+   node scripts/tv-bridge-cli.mjs strategy --help
    node scripts/tv-bridge-cli.mjs watchlist --help
    ```
 
@@ -240,6 +241,9 @@ node scripts/tv-bridge-cli.mjs chart get-state
 - `replay stop`: Exit replay mode.
 - `replay status`: Check active replay state.
 - `replay trade --action <buy|sell> --quantity <N>`: Simulate order execution in replay.
+
+### `strategy` — Strategy Tester Operations
+- `strategy update-report`: Clicks the "Update report" button in the Strategy Tester snackbar if present to recalculate strategy backtesting results.
 
 ### `watchlist` — Watchlist Management
 - `watchlist get`: Retrieve list of symbols and prices from the open watchlist panel.

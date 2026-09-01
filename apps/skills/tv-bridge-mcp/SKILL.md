@@ -47,6 +47,10 @@ Once connected, the following tools will be available:
 ### `bridge_get-info`
 - **Purpose**: Show bridge metadata.
 
+### `strategy_update-report`
+- **Purpose**: Click the "Update report" button in the Strategy Tester snackbar if present.
+- **Output**: JSON with `updated: true/false`, `reason` when absent/disabled, and execution status.
+
 ## Usage Guidelines
 
 1. **Automation**: Always check `bridge_health-check` before suggesting TradingView UI interactions.

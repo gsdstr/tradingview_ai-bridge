@@ -67,6 +67,7 @@ import {
   replayTrade,
   replayStatus,
 } from "./replay.js";
+import { strategyUpdateReport } from "./strategy.js";
 import {
   streamFetchQuote,
   streamFetchBar,
@@ -86,6 +87,7 @@ export * from "./indicators.js";
 export * from "./pane.js";
 export * from "./pine.js";
 export * from "./replay.js";
+export * from "./strategy.js";
 export * from "./stream.js";
 
 // A registry of all available actions
@@ -169,6 +171,9 @@ export const actionRegistry: Record<string, Action<any, any>> = {
   [replayTrade.name]: replayTrade,
   [replayStatus.name]: replayStatus,
 
+  // Strategy
+  [strategyUpdateReport.name]: strategyUpdateReport,
+
   // Stream
   [streamFetchQuote.name]: streamFetchQuote,
   [streamFetchBar.name]: streamFetchBar,
@@ -235,6 +240,7 @@ export const actionCliMetadata: Record<string, CliActionMetadata> = {
   [replayStop.name]: { domain: "replay", command: "stop" },
   [replayTrade.name]: { domain: "replay", command: "trade" },
   [replayStatus.name]: { domain: "replay", command: "status" },
+  [strategyUpdateReport.name]: { domain: "strategy", command: "update-report" },
   [streamFetchQuote.name]: { domain: "stream", command: "fetch-quote" },
   [streamFetchBar.name]: { domain: "stream", command: "fetch-bar" },
   [streamFetchValues.name]: { domain: "stream", command: "fetch-values" },
