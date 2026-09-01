@@ -62,9 +62,10 @@ export const dataGetStrategyResults: Action<undefined, z.ZodAny> = {
 
 export const dataGetStrategyPerformance: Action<undefined, z.ZodAny> = {
   name: "data_get-strategy-performance",
-  shortDescription: "Get detailed strategy performance",
+  shortDescription:
+    "Get detailed performance; strategy update-report only syncs the UI",
   description:
-    "Retrieves full performance metrics directly from the strategy tester internal API.",
+    "Retrieves full performance metrics directly from the strategy tester internal API without requiring a UI report update. Call strategy update-report only to synchronize the visible Strategy Tester report.",
   action: async () => {
     return getStrategyPerformance();
   },

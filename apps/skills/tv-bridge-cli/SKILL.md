@@ -205,7 +205,7 @@ node scripts/tv-bridge-cli.mjs chart get-state
 - `data get-indicator --entity-id <ID>`: State and parameters of an indicator.
 - `data get-study-values --entity-id <ID>`: Computed plot values.
 - `data get-strategy-results`: Strategy report metrics.
-- `data get-strategy-performance`: Performance summary.
+- `data get-strategy-performance`: Detailed performance metrics from the internal API; it does not require a UI report update.
 - `data get-trades [--limit <N>]`: List strategy trades.
 - `data get-pine-lines`: Extract Pine lines.
 - `data get-pine-labels`: Extract Pine labels.
@@ -222,7 +222,7 @@ node scripts/tv-bridge-cli.mjs chart get-state
 - `indicator list`: List all loaded indicators.
 - `indicator get-inputs --entity-id <ID>`: Read inputs for an indicator.
 - `indicator get-inputs-info --entity-id <ID>`: Inspect input schema.
-- `indicator set-inputs --entity-id <ID> --inputs <JSON>`: Update inputs.
+- `indicator set-inputs --entity-id <ID> --inputs <JSON>`: Update inputs. Strategy metrics recalculate without a UI report update; use `strategy update-report` only to synchronize the visible Strategy Tester report.
 - `indicator toggle-visibility --entity-id <ID>`: Toggle visibility.
 
 ### `pine` — Pine Script Editor & Compiler
@@ -243,7 +243,7 @@ node scripts/tv-bridge-cli.mjs chart get-state
 - `replay trade --action <buy|sell> --quantity <N>`: Simulate order execution in replay.
 
 ### `strategy` — Strategy Tester Operations
-- `strategy update-report`: Clicks the "Update report" button in the Strategy Tester snackbar if present to recalculate strategy backtesting results.
+- `strategy update-report`: Optionally clicks the "Update report" button in the Strategy Tester snackbar to synchronize its visible report after input or script changes. It is not required for `data get-strategy-performance`.
 
 ### `watchlist` — Watchlist Management
 - `watchlist get`: Retrieve list of symbols and prices from the open watchlist panel.

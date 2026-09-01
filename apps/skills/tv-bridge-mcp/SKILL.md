@@ -51,6 +51,11 @@ Once connected, the following tools will be available:
 - **Purpose**: Click the "Update report" button in the Strategy Tester snackbar if present.
 - **Output**: JSON with `updated: true/false`, `reason` when absent/disabled, and execution status.
 
+### Strategy report workflow
+
+- After `indicator_set-inputs` changes a strategy, call `data_get-strategy-performance` for recalculated metrics; it does not require a UI report update.
+- Call `strategy_update-report` only when the visible Strategy Tester report also needs synchronization.
+
 ## Usage Guidelines
 
 1. **Automation**: Always check `bridge_health-check` before suggesting TradingView UI interactions.

@@ -91,6 +91,17 @@ describe("strategy update-report", () => {
     });
   });
 
+  it("returns evaluation_failed when CDP evaluation rejects", async () => {
+    vi.mocked(evaluate).mockRejectedValue(new Error("CDP target detached"));
+
+    await expect(updateReport()).resolves.toEqual({
+      success: false,
+      updated: false,
+      reason: "evaluation_failed",
+      error: "CDP target detached",
+    });
+  });
+
   it("action executes core updateReport function", async () => {
     vi.mocked(evaluate).mockResolvedValue({
       success: true,

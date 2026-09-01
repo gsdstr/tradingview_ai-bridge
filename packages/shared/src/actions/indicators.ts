@@ -17,8 +17,10 @@ const inputsInputSchema = z.object({
 
 export const indicatorSetInputs: Action<typeof inputsInputSchema, z.ZodAny> = {
   name: "indicator_set-inputs",
-  shortDescription: "Change indicator settings",
-  description: "Updates the input parameters (props) for a specific indicator.",
+  shortDescription:
+    "Change settings; strategy update-report only syncs the visible report",
+  description:
+    "Updates the input parameters (props) for a specific indicator. Strategy metrics recalculate without a UI report update; call strategy update-report only to synchronize the visible Strategy Tester report.",
   inputSchema: inputsInputSchema,
   action: async (input) => {
     return setInputs(input);
